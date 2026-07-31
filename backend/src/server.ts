@@ -5,6 +5,7 @@ import type { DbClient } from './db/client.js';
 import type { Config } from './config.js';
 import { getConfig } from './config.js';
 import { getDbClient } from './db/client.js';
+import sessionPlugin from './plugins/session.js';
 import { connectionRoutes } from './routes/connection.js';
 import { charactersRoutes } from './routes/characters.js';
 
@@ -34,6 +35,7 @@ export function buildApp(context: AppContext): FastifyInstance {
 
   app.get('/health', async () => ({ status: 'ok' }));
 
+  app.register(sessionPlugin, { config: context.config });
   app.register(connectionRoutes, { prefix: '/api' });
   app.register(charactersRoutes, { prefix: '/api' });
 
@@ -43,6 +45,11 @@ export function buildApp(context: AppContext): FastifyInstance {
 declare module 'fastify' {
   interface FastifyInstance {
     appContext: AppContext;
+  }
+
+  interface FastifyRequest {
+    /** Id of the caller's browser session, assigned by the session plugin. */
+    sessionId: string;
   }
 }
 

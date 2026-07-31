@@ -1,36 +1,57 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
+import { eq } from 'drizzle-orm';
 import { battleNetConnection } from '../db/schema.js';
 import { encryptSecret } from '../db/crypto.js';
 import { buildAuthorizeUrl, exchangeCodeForTokens, fetchUserInfo } from '../battlenet/oauth.js';
 import { syncCharacters } from '../services/sync.js';
 
 const STATE_TTL_MS = 10 * 60 * 1000;
-const pendingStates = new Map<string, number>();
 
-function issueState(): string {
+interface PendingState {
+  expiresAt: number;
+  /** The browser session that initiated this authorize attempt. */
+  sessionId: string;
+}
+
+const pendingStates = new Map<string, PendingState>();
+
+function issueState(sessionId: string): string {
   const state = randomUUID();
-  pendingStates.set(state, Date.now() + STATE_TTL_MS);
+  pendingStates.set(state, { expiresAt: Date.now() + STATE_TTL_MS, sessionId });
   return state;
 }
 
-function consumeState(state: string | undefined): boolean {
-  if (!state) return false;
-  const expiresAt = pendingStates.get(state);
+/**
+ * Resolves and consumes a `state` value, returning the session id that
+ * initiated it. Deliberately does not consult the callback request's own
+ * cookie — Blizzard redirects the browser directly to this endpoint,
+ * bypassing the frontend dev proxy the session cookie was originally set
+ * through, so the request's cookie can't be trusted here (see research.md's
+ * "Session cookie scope across the OAuth detour").
+ */
+function consumeState(state: string | undefined): string | undefined {
+  if (!state) return undefined;
+  const entry = pendingStates.get(state);
   pendingStates.delete(state);
-  return expiresAt !== undefined && expiresAt >= Date.now();
+  if (!entry || entry.expiresAt < Date.now()) return undefined;
+  return entry.sessionId;
 }
 
 export async function connectionRoutes(app: FastifyInstance): Promise<void> {
   const { db, config } = app.appContext;
 
-  app.get('/connection', async () => {
-    const [connection] = await db.select().from(battleNetConnection).limit(1);
+  app.get('/connection', async (request) => {
+    const [connection] = await db
+      .select()
+      .from(battleNetConnection)
+      .where(eq(battleNetConnection.sessionId, request.sessionId));
     if (!connection) {
       return { connected: false };
     }
     return {
       connected: true,
+      battletag: connection.battletag,
       region: connection.region,
       connectedAt: connection.connectedAt.toISOString(),
       lastSyncedAt: connection.lastSyncedAt?.toISOString() ?? null,
@@ -39,8 +60,8 @@ export async function connectionRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  app.get('/connection/authorize', async (_request, reply) => {
-    const state = issueState();
+  app.get('/connection/authorize', async (request, reply) => {
+    const state = issueState(request.sessionId);
     reply.redirect(buildAuthorizeUrl(config, state));
   });
 
@@ -48,8 +69,9 @@ export async function connectionRoutes(app: FastifyInstance): Promise<void> {
     '/connection/callback',
     async (request, reply) => {
       const { code, state, error } = request.query;
+      const sessionId = consumeState(state);
 
-      if (error || !code || !consumeState(state)) {
+      if (error || !code || !sessionId) {
         reply.redirect(`${config.frontendUrl}/?connectionError=1`);
         return;
       }
@@ -58,14 +80,17 @@ export async function connectionRoutes(app: FastifyInstance): Promise<void> {
         const tokens = await exchangeCodeForTokens(config, code);
         const userInfo = await fetchUserInfo(config, tokens.accessToken);
 
-        // FR-010: only one connection at a time — replace any existing one
-        // (cascade-deletes its characters) rather than creating a duplicate.
-        await db.delete(battleNetConnection);
+        // FR-005: at most one connection per session — replace this
+        // session's existing row (cascade-deletes its characters) rather
+        // than creating a duplicate. Other sessions' rows are untouched.
+        await db.delete(battleNetConnection).where(eq(battleNetConnection.sessionId, sessionId));
 
         const [connection] = await db
           .insert(battleNetConnection)
           .values({
+            sessionId,
             battlenetAccountId: userInfo.id,
+            battletag: userInfo.battletag,
             region: config.battlenet.region,
             accessToken: encryptSecret(tokens.accessToken, config.tokenEncryptionKey),
             tokenExpiresAt: tokens.expiresAt,
@@ -86,8 +111,10 @@ export async function connectionRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  app.delete('/connection', async (_request, reply) => {
-    await db.delete(battleNetConnection);
+  app.delete('/connection', async (request, reply) => {
+    await db
+      .delete(battleNetConnection)
+      .where(eq(battleNetConnection.sessionId, request.sessionId));
     reply.status(204).send();
   });
 }

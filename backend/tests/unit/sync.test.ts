@@ -20,7 +20,9 @@ async function insertConnection(
   const [connection] = await db
     .insert(battleNetConnection)
     .values({
+      sessionId: 'session-1',
       battlenetAccountId: 'acct-1',
+      battletag: 'Tester#1234',
       region: 'us',
       accessToken: encryptSecret('access-token', config.tokenEncryptionKey),
       tokenExpiresAt: new Date(Date.now() + 3600_000),

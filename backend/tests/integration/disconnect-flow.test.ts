@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { battleNetConnection, character } from '../../src/db/schema.js';
 import { buildTestApp } from '../helpers/testApp.js';
+import { sessionCookieHeader } from '../helpers/session.js';
 
 let tempDir: string;
 let dbPath: string;
@@ -22,12 +23,14 @@ afterEach(() => {
 
 describe('disconnect flow (real temp SQLite file)', () => {
   it('cascade-deletes Character rows when the connection is deleted', async () => {
-    const { app, db } = buildTestApp(dbPath);
+    const { app, db, config } = buildTestApp(dbPath);
     currentDb = db;
     const [connection] = await db
       .insert(battleNetConnection)
       .values({
+        sessionId: 'session-1',
         battlenetAccountId: 'acct-1',
+        battletag: 'Tester#1234',
         region: 'us',
         accessToken: 'enc-access',
         tokenExpiresAt: new Date(),
@@ -71,7 +74,11 @@ describe('disconnect flow (real temp SQLite file)', () => {
 
     expect(await db.select().from(character)).toHaveLength(2);
 
-    const response = await app.inject({ method: 'DELETE', url: '/api/connection' });
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/api/connection',
+      headers: { cookie: sessionCookieHeader('session-1', config) },
+    });
 
     expect(response.statusCode).toBe(204);
     expect(await db.select().from(battleNetConnection)).toHaveLength(0);

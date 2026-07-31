@@ -16,9 +16,17 @@ vi.mock('../../src/battlenet/client.js', () => ({
 import { exchangeCodeForTokens, fetchUserInfo } from '../../src/battlenet/oauth.js';
 import { battleNetConnection, character } from '../../src/db/schema.js';
 import { buildTestApp } from '../helpers/testApp.js';
+import { sessionCookieHeader } from '../helpers/session.js';
 
-async function getIssuedState(app: ReturnType<typeof buildTestApp>['app']): Promise<string> {
-  const authorizeResponse = await app.inject({ method: 'GET', url: '/api/connection/authorize' });
+async function getIssuedState(
+  app: ReturnType<typeof buildTestApp>['app'],
+  cookie: string,
+): Promise<string> {
+  const authorizeResponse = await app.inject({
+    method: 'GET',
+    url: '/api/connection/authorize',
+    headers: { cookie },
+  });
   const location = authorizeResponse.headers.location as string;
   return new URL(location, 'http://localhost').searchParams.get('state')!;
 }
@@ -28,8 +36,9 @@ describe('GET /api/connection/callback (reconnect)', () => {
     vi.clearAllMocks();
   });
 
-  it('replaces an existing connection instead of creating a duplicate (FR-010)', async () => {
-    const { app, db } = buildTestApp();
+  it('replaces an existing connection instead of creating a duplicate (FR-005)', async () => {
+    const { app, db, config } = buildTestApp();
+    const cookie = sessionCookieHeader('session-1', config);
 
     vi.mocked(exchangeCodeForTokens).mockResolvedValue({
       accessToken: 'access-1',
@@ -39,7 +48,8 @@ describe('GET /api/connection/callback (reconnect)', () => {
 
     await app.inject({
       method: 'GET',
-      url: `/api/connection/callback?code=code1&state=${await getIssuedState(app)}`,
+      url: `/api/connection/callback?code=code1&state=${await getIssuedState(app, cookie)}`,
+      headers: { cookie },
     });
 
     const [firstConnection] = await db.select().from(battleNetConnection);
@@ -68,7 +78,8 @@ describe('GET /api/connection/callback (reconnect)', () => {
 
     await app.inject({
       method: 'GET',
-      url: `/api/connection/callback?code=code2&state=${await getIssuedState(app)}`,
+      url: `/api/connection/callback?code=code2&state=${await getIssuedState(app, cookie)}`,
+      headers: { cookie },
     });
 
     const connections = await db.select().from(battleNetConnection);

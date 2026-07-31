@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { battleNetConnection, character } from '../../src/db/schema.js';
 import { buildTestApp } from '../helpers/testApp.js';
+import { sessionCookieHeader } from '../helpers/session.js';
 
 describe('GET /api/characters', () => {
   it('returns an empty roster when nothing is connected', async () => {
@@ -13,11 +14,13 @@ describe('GET /api/characters', () => {
   });
 
   it('returns characters with name, class, realm, and faction', async () => {
-    const { app, db } = buildTestApp();
+    const { app, db, config } = buildTestApp();
     const [connection] = await db
       .insert(battleNetConnection)
       .values({
+        sessionId: 'session-1',
         battlenetAccountId: 'acct-1',
+        battletag: 'Tester#1234',
         region: 'us',
         accessToken: 'enc-access',
         tokenExpiresAt: new Date(),
@@ -42,7 +45,11 @@ describe('GET /api/characters', () => {
       updatedAt: new Date(),
     });
 
-    const response = await app.inject({ method: 'GET', url: '/api/characters' });
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/characters',
+      headers: { cookie: sessionCookieHeader('session-1', config) },
+    });
 
     expect(response.statusCode).toBe(200);
     const body = response.json() as { characters: unknown[] };
@@ -58,11 +65,13 @@ describe('GET /api/characters', () => {
   });
 
   it('returns imageUrl as null when Blizzard has no media for the character', async () => {
-    const { app, db } = buildTestApp();
+    const { app, db, config } = buildTestApp();
     const [connection] = await db
       .insert(battleNetConnection)
       .values({
+        sessionId: 'session-1',
         battlenetAccountId: 'acct-1',
+        battletag: 'Tester#1234',
         region: 'us',
         accessToken: 'enc-access',
         tokenExpiresAt: new Date(),
@@ -86,7 +95,11 @@ describe('GET /api/characters', () => {
       updatedAt: new Date(),
     });
 
-    const response = await app.inject({ method: 'GET', url: '/api/characters' });
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/characters',
+      headers: { cookie: sessionCookieHeader('session-1', config) },
+    });
 
     const body = response.json() as { characters: { imageUrl: string | null }[] };
     expect(body.characters[0]?.imageUrl).toBeNull();

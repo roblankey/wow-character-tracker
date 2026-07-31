@@ -20,6 +20,7 @@ import { fetchFullCharacterRoster } from '../../src/battlenet/client.js';
 import { battleNetConnection, character } from '../../src/db/schema.js';
 import { encryptSecret } from '../../src/db/crypto.js';
 import { buildTestApp, createTestConfig } from '../helpers/testApp.js';
+import { sessionCookieHeader } from '../helpers/session.js';
 
 const testConfig = createTestConfig();
 const encryptedAccess = encryptSecret('access-token', testConfig.tokenEncryptionKey);
@@ -48,7 +49,9 @@ describe('refresh flow (real temp SQLite file, stubbed Blizzard client)', () => 
     const [connection] = await db
       .insert(battleNetConnection)
       .values({
+        sessionId: 'session-1',
         battlenetAccountId: 'acct-1',
+        battletag: 'Tester#1234',
         region: 'us',
         accessToken: encryptedAccess,
         tokenExpiresAt: new Date(Date.now() + 3600_000),
@@ -108,7 +111,11 @@ describe('refresh flow (real temp SQLite file, stubbed Blizzard client)', () => 
       },
     ]);
 
-    const response = await app.inject({ method: 'POST', url: '/api/characters/refresh' });
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/characters/refresh',
+      headers: { cookie: sessionCookieHeader('session-1', testConfig) },
+    });
     expect(response.statusCode).toBe(200);
 
     const rows = await db.select().from(character);

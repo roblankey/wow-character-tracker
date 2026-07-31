@@ -51,14 +51,21 @@ Request flow: `server.ts` builds the Fastify app and decorates it with an `appCo
 registered with `app.register(...Routes, { prefix: '/api' })`, not classes or DI containers.
 
 - `config.ts` — reads env vars once (`getConfig`, memoized), validates `TOKEN_ENCRYPTION_KEY`
-  is exactly 32 bytes. `resetConfigCacheForTests()` exists for test isolation.
-- `db/schema.ts` — Drizzle schema, two tables: `battleNetConnection` (single row — this is a
-  single-user app, there is never more than one connection) and `character` (FK to
-  connection, cascade-deletes on disconnect). `professions` is stored as a JSON-encoded text
-  column, not a join table.
+  is exactly 32 bytes and `SESSION_COOKIE_SECRET` is at least 32 characters.
+  `resetConfigCacheForTests()` exists for test isolation.
+- `db/schema.ts` — Drizzle schema, two tables: `battleNetConnection` (scoped by `sessionId`,
+  unique-indexed — at most one row per browser session, not one row for the whole app; see
+  `plugins/session.ts`) and `character` (FK to connection, cascade-deletes on disconnect).
+  `professions` is stored as a JSON-encoded text column, not a join table.
 - `db/client.ts` — `better-sqlite3` + Drizzle, WAL mode, foreign keys on.
 - `db/crypto.ts` — AES-256-GCM encrypt/decrypt for OAuth tokens at rest
   (`iv:authTag:ciphertext`, each base64). Access tokens are never stored in plaintext.
+- `plugins/session.ts` — assigns every request a signed, long-lived, `httpOnly`,
+  `sameSite=Lax`, host-only session cookie (`wowster_session`) via `@fastify/cookie`, generating
+  a fresh id when none is present or the signature doesn't verify. Wrapped with `fastify-plugin`
+  so `request.sessionId` and the `onRequest` hook apply globally, not just within the plugin's
+  own encapsulated scope. This is the sole mechanism distinguishing browser sessions — every
+  route below filters/writes by `request.sessionId` rather than assuming a single global row.
 - `battlenet/oauth.ts` — Battle.net OAuth (authorize URL, code exchange, userinfo). Battle.net's
   user-authorization flow issues **no refresh token**; an expired token can only be resolved by
   the user reconnecting (which replaces the stored connection).
@@ -77,13 +84,18 @@ registered with `app.register(...Routes, { prefix: '/api' })`, not classes or DI
   failed sync leaves the last good roster intact and visible.
 - `routes/connection.ts` — `GET/DELETE /api/connection`, `GET /api/connection/authorize`
   (redirects to Battle.net), `GET /api/connection/callback` (OAuth callback: exchanges code,
-  replaces any existing connection — only one at a time — then triggers an initial
-  `syncCharacters`). CSRF `state` param is tracked in an in-memory `Map` with a 10-minute TTL.
-  Since Blizzard redirects the browser directly to this backend endpoint (not through the
-  frontend dev proxy), the callback redirects back to `config.frontendUrl` as an absolute URL.
-- `routes/characters.ts` — `GET /api/characters` (returns stored roster, professions JSON
-  parsed back into objects), `POST /api/characters/refresh` (re-runs `syncCharacters` for the
-  one existing connection; 409 if none connected).
+  replaces the *caller's session's* existing connection — at most one per session, not one for
+  the whole app — then triggers an initial `syncCharacters`). CSRF `state` is tracked in an
+  in-memory `Map` with a 10-minute TTL, keyed alongside the session id that initiated the
+  authorize attempt; the callback attributes the resulting connection to *that* session id, not
+  whatever cookie the callback request itself carries — Blizzard redirects the browser directly
+  to this backend endpoint, bypassing the frontend dev proxy the session cookie was originally
+  set through, so the callback request's own cookie can't be trusted for attribution. The
+  callback redirects back to `config.frontendUrl` as an absolute URL for the same reason.
+- `routes/characters.ts` — `GET /api/characters` (returns the caller's session's stored roster,
+  professions JSON parsed back into objects; empty list if the session has no connection),
+  `POST /api/characters/refresh` (re-runs `syncCharacters` for the caller's session's
+  connection; 409 if none connected).
 
 ### Frontend (`frontend/src`)
 

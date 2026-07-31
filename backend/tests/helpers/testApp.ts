@@ -8,6 +8,7 @@ export function createTestConfig(overrides: Partial<Config['battlenet']> = {}): 
     port: 0,
     dbPath: ':memory:',
     tokenEncryptionKey: Buffer.alloc(32, 7),
+    sessionCookieSecret: 'test-session-cookie-secret-at-least-32-chars',
     frontendUrl: 'http://localhost:5173',
     battlenet: {
       clientId: 'test-client-id',

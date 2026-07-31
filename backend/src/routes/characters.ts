@@ -6,8 +6,20 @@ import { syncCharacters } from '../services/sync.js';
 export async function charactersRoutes(app: FastifyInstance): Promise<void> {
   const { db, config } = app.appContext;
 
-  app.get('/characters', async () => {
-    const rows = await db.select().from(character).orderBy(desc(character.updatedAt));
+  app.get('/characters', async (request) => {
+    const [connection] = await db
+      .select()
+      .from(battleNetConnection)
+      .where(eq(battleNetConnection.sessionId, request.sessionId));
+    if (!connection) {
+      return { characters: [] };
+    }
+
+    const rows = await db
+      .select()
+      .from(character)
+      .where(eq(character.connectionId, connection.id))
+      .orderBy(desc(character.updatedAt));
     return {
       characters: rows.map((row) => ({
         id: row.id,
@@ -27,8 +39,11 @@ export async function charactersRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  app.post('/characters/refresh', async (_request, reply) => {
-    const [connection] = await db.select().from(battleNetConnection).limit(1);
+  app.post('/characters/refresh', async (request, reply) => {
+    const [connection] = await db
+      .select()
+      .from(battleNetConnection)
+      .where(eq(battleNetConnection.sessionId, request.sessionId));
     if (!connection) {
       reply.status(409).send({ error: 'No Battle.net account is connected' });
       return;

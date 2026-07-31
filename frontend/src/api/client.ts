@@ -1,5 +1,6 @@
 export interface ConnectionStatus {
   connected: boolean;
+  battletag?: string;
   region?: string;
   connectedAt?: string;
   lastSyncedAt?: string | null;

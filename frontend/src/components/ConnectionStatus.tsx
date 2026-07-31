@@ -34,7 +34,7 @@ export function ConnectionStatus({
   return (
     <div className="account-area">
       <span className="account-info">
-        Connected ({status.region}
+        Connected as {status.battletag} ({status.region}
         {status.lastSyncedAt
           ? ` · last synced ${new Date(status.lastSyncedAt).toLocaleString()}`
           : ''}

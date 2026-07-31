@@ -17,6 +17,8 @@ export interface Config {
   dbPath: string;
   /** 32-byte key (as a Buffer) used to encrypt OAuth tokens at rest. */
   tokenEncryptionKey: Buffer;
+  /** Secret used to sign the per-browser-session cookie. */
+  sessionCookieSecret: string;
   /**
    * Origin the browser should land on after the Battle.net OAuth callback.
    * Blizzard redirects the browser directly to the backend, not through the
@@ -40,10 +42,14 @@ export function getConfig(): Config {
     },
     dbPath: process.env.DB_PATH ?? './data/wow-character-tracker.sqlite',
     tokenEncryptionKey: Buffer.from(requireEnv('TOKEN_ENCRYPTION_KEY'), 'hex'),
+    sessionCookieSecret: requireEnv('SESSION_COOKIE_SECRET'),
     frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:5173',
   };
   if (cached.tokenEncryptionKey.length !== 32) {
     throw new Error('TOKEN_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)');
+  }
+  if (cached.sessionCookieSecret.length < 32) {
+    throw new Error('SESSION_COOKIE_SECRET must be at least 32 characters long');
   }
   return cached;
 }

@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { battleNetConnection, character } from '../../src/db/schema.js';
 import { buildTestApp } from '../helpers/testApp.js';
+import { sessionCookieHeader } from '../helpers/session.js';
 
 describe('DELETE /api/connection', () => {
   it('deletes the connection and cascade-deletes its characters', async () => {
-    const { app, db } = buildTestApp();
+    const { app, db, config } = buildTestApp();
     const [connection] = await db
       .insert(battleNetConnection)
       .values({
+        sessionId: 'session-1',
         battlenetAccountId: 'acct-1',
+        battletag: 'Tester#1234',
         region: 'us',
         accessToken: 'enc-access',
         tokenExpiresAt: new Date(),
@@ -32,7 +35,11 @@ describe('DELETE /api/connection', () => {
       updatedAt: new Date(),
     });
 
-    const response = await app.inject({ method: 'DELETE', url: '/api/connection' });
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/api/connection',
+      headers: { cookie: sessionCookieHeader('session-1', config) },
+    });
 
     expect(response.statusCode).toBe(204);
     expect(await db.select().from(battleNetConnection)).toHaveLength(0);

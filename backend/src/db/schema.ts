@@ -1,19 +1,27 @@
 import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
-export const battleNetConnection = sqliteTable('battlenet_connection', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  battlenetAccountId: text('battlenet_account_id').notNull(),
-  region: text('region').notNull(),
-  accessToken: text('access_token').notNull(),
-  tokenExpiresAt: integer('token_expires_at', { mode: 'timestamp_ms' }).notNull(),
-  connectedAt: integer('connected_at', { mode: 'timestamp_ms' }).notNull(),
-  lastSyncedAt: integer('last_synced_at', { mode: 'timestamp_ms' }),
-  lastSyncStatus: text('last_sync_status', { enum: ['success', 'failure', 'never_run'] })
-    .notNull()
-    .default('never_run'),
-  lastSyncError: text('last_sync_error'),
-});
+export const battleNetConnection = sqliteTable(
+  'battlenet_connection',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    /** Id of the browser session (from the signed session cookie) that owns this connection. */
+    sessionId: text('session_id').notNull(),
+    battlenetAccountId: text('battlenet_account_id').notNull(),
+    /** The connected account's Battle.net tag, e.g. "Playername#1234". */
+    battletag: text('battletag').notNull(),
+    region: text('region').notNull(),
+    accessToken: text('access_token').notNull(),
+    tokenExpiresAt: integer('token_expires_at', { mode: 'timestamp_ms' }).notNull(),
+    connectedAt: integer('connected_at', { mode: 'timestamp_ms' }).notNull(),
+    lastSyncedAt: integer('last_synced_at', { mode: 'timestamp_ms' }),
+    lastSyncStatus: text('last_sync_status', { enum: ['success', 'failure', 'never_run'] })
+      .notNull()
+      .default('never_run'),
+    lastSyncError: text('last_sync_error'),
+  },
+  (table) => [uniqueIndex('battlenet_connection_session_id_idx').on(table.sessionId)],
+);
 
 export const character = sqliteTable(
   'character',
