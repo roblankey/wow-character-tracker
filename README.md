@@ -1,12 +1,15 @@
 # wow-character-tracker
 
 Connect your Battle.net account, see your World of Warcraft characters in one
-roster, compare them side-by-side, and refresh on demand. A locally-run,
-single-user app: a TypeScript/Fastify backend that owns the Battle.net OAuth
-flow and a local SQLite database, and a TypeScript/React frontend.
+roster, compare them side-by-side, and refresh on demand. Click a character
+to open a detail panel with its full stats and Blizzard character image. A
+locally-run, single-user app: a TypeScript/Fastify backend that owns the
+Battle.net OAuth flow and a local SQLite database, and a TypeScript/React
+frontend.
 
-See `specs/001-battlenet-character-comparison/` for the full spec, plan, and
-task breakdown.
+See `specs/001-battlenet-character-comparison/` and
+`specs/002-character-detail-panel/` for the full spec, plan, and task
+breakdown of each feature.
 
 ## Prerequisites
 
