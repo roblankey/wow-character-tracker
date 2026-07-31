@@ -6,7 +6,7 @@ API shapes referenced below.
 
 ## Prerequisites
 
-- Node.js 20 LTS and a package manager (npm/pnpm)
+- Node.js 22 LTS or newer and a package manager (npm/pnpm)
 - A Battle.net developer application (client ID + secret) from
   https://develop.battle.net, with its OAuth redirect URI set to this
   app's `GET /api/connection/callback` endpoint

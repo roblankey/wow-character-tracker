@@ -20,15 +20,15 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create `backend/` and `frontend/` directory structure per plan.md's Project Structure section
-- [ ] T002 Initialize the backend TypeScript + Fastify project (`backend/package.json`, `backend/tsconfig.json`) with `fastify`, `better-sqlite3`, `drizzle-orm`, `drizzle-kit` dependencies
-- [ ] T003 [P] Initialize the frontend TypeScript + Vite + React project (`frontend/package.json`, `frontend/tsconfig.json`)
-- [ ] T004 [P] Configure ESLint + Prettier for `backend/` per constitution Principle I (Code Quality)
-- [ ] T005 [P] Configure ESLint + Prettier for `frontend/` per constitution Principle I (Code Quality)
-- [ ] T006 [P] Configure Vitest for `backend/` in `backend/vitest.config.ts`
-- [ ] T007 [P] Configure Vitest + React Testing Library for `frontend/` in `frontend/vitest.config.ts`
-- [ ] T008 Add backend environment configuration (Battle.net client ID/secret, OAuth redirect URI, SQLite file path) in `backend/src/config.ts`
-- [ ] T009 [P] Configure CI (e.g., GitHub Actions) to run lint, type-check, and the Vitest suite for both `backend/` and `frontend/` on every pull request, per constitution Quality Gates
+- [X] T001 Create `backend/` and `frontend/` directory structure per plan.md's Project Structure section
+- [X] T002 Initialize the backend TypeScript + Fastify project (`backend/package.json`, `backend/tsconfig.json`) with `fastify`, `better-sqlite3`, `drizzle-orm`, `drizzle-kit` dependencies
+- [X] T003 [P] Initialize the frontend TypeScript + Vite + React project (`frontend/package.json`, `frontend/tsconfig.json`)
+- [X] T004 [P] Configure ESLint + Prettier for `backend/` per constitution Principle I (Code Quality)
+- [X] T005 [P] Configure ESLint + Prettier for `frontend/` per constitution Principle I (Code Quality)
+- [X] T006 [P] Configure Vitest for `backend/` in `backend/vitest.config.ts`
+- [X] T007 [P] Configure Vitest + React Testing Library for `frontend/` in `frontend/vitest.config.ts`
+- [X] T008 Add backend environment configuration (Battle.net client ID/secret, OAuth redirect URI, SQLite file path) in `backend/src/config.ts`
+- [X] T009 [P] Configure CI (e.g., GitHub Actions) to run lint, type-check, and the Vitest suite for both `backend/` and `frontend/` on every pull request, per constitution Quality Gates
 
 ---
 
@@ -38,14 +38,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T010 Define Drizzle schema for `BattleNetConnection` and `Character` (per data-model.md) in `backend/src/db/schema.ts`
-- [ ] T011 Configure `drizzle-kit` and generate the initial migration in `backend/drizzle.config.ts` and `backend/src/db/migrations/` (depends on T010)
-- [ ] T012 Create the SQLite client/connection singleton in `backend/src/db/client.ts` (depends on T010)
-- [ ] T013 [P] Implement the Battle.net OAuth client (authorize URL, code exchange, token refresh) in `backend/src/battlenet/oauth.ts`
-- [ ] T014 [P] Implement the Blizzard Game Data/Profile API client (fetch account character list), including handling HTTP 429/Retry-After responses with backoff so refresh/connect calls degrade gracefully instead of failing hard, in `backend/src/battlenet/client.ts`
-- [ ] T015 Set up the Fastify app instance, JSON schema validation, and error-handling middleware in `backend/src/server.ts`
-- [ ] T016 [P] Create the typed backend API client scaffold in `frontend/src/api/client.ts` (per contracts/api.md)
-- [ ] T017 [P] Set up the React app shell and page routing in `frontend/src/App.tsx`
+- [X] T010 Define Drizzle schema for `BattleNetConnection` and `Character` (per data-model.md) in `backend/src/db/schema.ts`
+- [X] T011 Configure `drizzle-kit` and generate the initial migration in `backend/drizzle.config.ts` and `backend/src/db/migrations/` (depends on T010)
+- [X] T012 Create the SQLite client/connection singleton in `backend/src/db/client.ts` (depends on T010)
+- [X] T013 [P] Implement the Battle.net OAuth client (authorize URL, code exchange, token refresh) in `backend/src/battlenet/oauth.ts`
+- [X] T014 [P] Implement the Blizzard Game Data/Profile API client (fetch account character list), including handling HTTP 429/Retry-After responses with backoff so refresh/connect calls degrade gracefully instead of failing hard, in `backend/src/battlenet/client.ts`
+- [X] T015 Set up the Fastify app instance, JSON schema validation, and error-handling middleware in `backend/src/server.ts`
+- [X] T016 [P] Create the typed backend API client scaffold in `frontend/src/api/client.ts` (per contracts/api.md)
+- [X] T017 [P] Set up the React app shell and page routing in `frontend/src/App.tsx`
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
@@ -61,28 +61,28 @@
 
 > Write these tests FIRST, ensure they FAIL before implementation
 
-- [ ] T018 [P] [US1] Contract test for `GET /api/connection` in `backend/tests/contract/connection.test.ts`
-- [ ] T019 [P] [US1] Contract test for `GET /api/connection/callback` success and failure paths in `backend/tests/contract/connection-callback.test.ts`
-- [ ] T020 [P] [US1] Contract test for `DELETE /api/connection` in `backend/tests/contract/connection-delete.test.ts`
-- [ ] T021 [P] [US1] Contract test for `GET /api/characters` in `backend/tests/contract/characters.test.ts`
-- [ ] T022 [P] [US1] Integration test: connect flow persists `BattleNetConnection` and `Character` rows using a real temp SQLite file and a stubbed Blizzard client in `backend/tests/integration/connect-flow.test.ts`
-- [ ] T023 [P] [US1] Integration test: disconnect cascade-deletes `Character` rows in `backend/tests/integration/disconnect-flow.test.ts`
-- [ ] T024 [P] [US1] Frontend integration test: roster page renders characters, an empty-roster state, and a disconnect action in `frontend/tests/integration/roster-page.test.tsx`
-- [ ] T025 [P] [US1] Contract test: `GET /api/connection/callback` when a connection already exists replaces it instead of creating a duplicate (FR-010), in `backend/tests/contract/connection-reconnect.test.ts`
+- [X] T018 [P] [US1] Contract test for `GET /api/connection` in `backend/tests/contract/connection.test.ts`
+- [X] T019 [P] [US1] Contract test for `GET /api/connection/callback` success and failure paths in `backend/tests/contract/connection-callback.test.ts`
+- [X] T020 [P] [US1] Contract test for `DELETE /api/connection` in `backend/tests/contract/connection-delete.test.ts`
+- [X] T021 [P] [US1] Contract test for `GET /api/characters` in `backend/tests/contract/characters.test.ts`
+- [X] T022 [P] [US1] Integration test: connect flow persists `BattleNetConnection` and `Character` rows using a real temp SQLite file and a stubbed Blizzard client in `backend/tests/integration/connect-flow.test.ts`
+- [X] T023 [P] [US1] Integration test: disconnect cascade-deletes `Character` rows in `backend/tests/integration/disconnect-flow.test.ts`
+- [X] T024 [P] [US1] Frontend integration test: roster page renders characters, an empty-roster state, and a disconnect action in `frontend/tests/integration/roster-page.test.tsx`
+- [X] T025 [P] [US1] Contract test: `GET /api/connection/callback` when a connection already exists replaces it instead of creating a duplicate (FR-010), in `backend/tests/contract/connection-reconnect.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T026 [US1] Implement the sync service (fetch via Blizzard client, upsert `Character` rows, update `BattleNetConnection` sync fields) in `backend/src/services/sync.ts` (depends on T010-T014)
-- [ ] T027 [US1] Implement `GET /api/connection/authorize` in `backend/src/routes/connection.ts` (depends on T013)
-- [ ] T028 [US1] Implement `GET /api/connection/callback` (token exchange + initial sync + redirect); if a `BattleNetConnection` already exists, replace it — delete the old connection's characters and store the new tokens — rather than creating a second row, satisfying FR-010, in `backend/src/routes/connection.ts` (depends on T026, T027)
-- [ ] T029 [US1] Implement `GET /api/connection` in `backend/src/routes/connection.ts`
-- [ ] T030 [US1] Implement `DELETE /api/connection` (cascade delete) in `backend/src/routes/connection.ts`
-- [ ] T031 [US1] Implement `GET /api/characters` in `backend/src/routes/characters.ts`
-- [ ] T032 [US1] Register connection and characters routes in `backend/src/server.ts` (depends on T027-T031)
-- [ ] T033 [P] [US1] Build the `RosterTable` component in `frontend/src/components/RosterTable.tsx`
-- [ ] T034 [P] [US1] Build the `ConnectionStatus` component (connect/disconnect controls, empty/error states) in `frontend/src/components/ConnectionStatus.tsx`
-- [ ] T035 [US1] Build `RosterPage`, wiring `ConnectionStatus` and `RosterTable` to the backend API in `frontend/src/pages/RosterPage.tsx` (depends on T016, T033, T034)
-- [ ] T036 [US1] Add explicit loading/error states to `RosterPage` per constitution Principle III in `frontend/src/pages/RosterPage.tsx` (depends on T035)
+- [X] T026 [US1] Implement the sync service (fetch via Blizzard client, upsert `Character` rows, update `BattleNetConnection` sync fields) in `backend/src/services/sync.ts` (depends on T010-T014)
+- [X] T027 [US1] Implement `GET /api/connection/authorize` in `backend/src/routes/connection.ts` (depends on T013)
+- [X] T028 [US1] Implement `GET /api/connection/callback` (token exchange + initial sync + redirect); if a `BattleNetConnection` already exists, replace it — delete the old connection's characters and store the new tokens — rather than creating a second row, satisfying FR-010, in `backend/src/routes/connection.ts` (depends on T026, T027)
+- [X] T029 [US1] Implement `GET /api/connection` in `backend/src/routes/connection.ts`
+- [X] T030 [US1] Implement `DELETE /api/connection` (cascade delete) in `backend/src/routes/connection.ts`
+- [X] T031 [US1] Implement `GET /api/characters` in `backend/src/routes/characters.ts`
+- [X] T032 [US1] Register connection and characters routes in `backend/src/server.ts` (depends on T027-T031)
+- [X] T033 [P] [US1] Build the `RosterTable` component in `frontend/src/components/RosterTable.tsx`
+- [X] T034 [P] [US1] Build the `ConnectionStatus` component (connect/disconnect controls, empty/error states) in `frontend/src/components/ConnectionStatus.tsx`
+- [X] T035 [US1] Build `RosterPage`, wiring `ConnectionStatus` and `RosterTable` to the backend API in `frontend/src/pages/RosterPage.tsx` (depends on T016, T033, T034)
+- [X] T036 [US1] Add explicit loading/error states to `RosterPage` per constitution Principle III in `frontend/src/pages/RosterPage.tsx` (depends on T035)
 
 **Checkpoint**: User Story 1 is fully functional and independently testable
 
@@ -96,16 +96,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T037 [P] [US2] Unit test for the character comparison diff utility in `frontend/tests/unit/compare.test.ts`
-- [ ] T038 [P] [US2] Frontend integration test: comparison view highlights differences, shows "no differences," and shows "need two characters" states in `frontend/tests/integration/compare-page.test.tsx`
+- [X] T037 [P] [US2] Unit test for the character comparison diff utility in `frontend/tests/unit/compare.test.ts`
+- [X] T038 [P] [US2] Frontend integration test: comparison view highlights differences, shows "no differences," and shows "need two characters" states in `frontend/tests/integration/compare-page.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T039 [P] [US2] Implement the `compareCharacters` diff utility (per data-model.md's derived Comparison concept) in `frontend/src/api/compare.ts`
-- [ ] T040 [P] [US2] Build the `ComparisonView` component (side-by-side table with highlighted differences) in `frontend/src/components/ComparisonView.tsx`
-- [ ] T041 [US2] Build `ComparePage`: character selection UI wired to `compareCharacters` and `ComparisonView` in `frontend/src/pages/ComparePage.tsx` (depends on T039, T040)
-- [ ] T042 [US2] Handle the single-character and identical-characters edge cases in `ComparePage` in `frontend/src/pages/ComparePage.tsx` (depends on T041)
-- [ ] T043 [US2] Add navigation from `RosterPage` to `ComparePage` with the selected characters in `frontend/src/App.tsx` (depends on T017, T035, T041)
+- [X] T039 [P] [US2] Implement the `compareCharacters` diff utility (per data-model.md's derived Comparison concept) in `frontend/src/api/compare.ts`
+- [X] T040 [P] [US2] Build the `ComparisonView` component (side-by-side table with highlighted differences) in `frontend/src/components/ComparisonView.tsx`
+- [X] T041 [US2] Build `ComparePage`: character selection UI wired to `compareCharacters` and `ComparisonView` in `frontend/src/pages/ComparePage.tsx` (depends on T039, T040)
+- [X] T042 [US2] Handle the single-character and identical-characters edge cases in `ComparePage` in `frontend/src/pages/ComparePage.tsx` (depends on T041)
+- [X] T043 [US2] Add navigation from `RosterPage` to `ComparePage` with the selected characters — implemented as a selection UI in `RosterTable`/`RosterPage` (checkboxes + a "Compare selected" link carrying `?ids=`) with `ComparePage` reading the ids via `useSearchParams`, rather than in `App.tsx` itself, since the selection state naturally lives on the roster page (depends on T017, T035, T041)
 
 **Checkpoint**: User Stories 1 AND 2 both work independently
 
@@ -119,17 +119,17 @@
 
 ### Tests for User Story 3
 
-- [ ] T044 [P] [US3] Contract test for `POST /api/characters/refresh` success and failure responses in `backend/tests/contract/refresh.test.ts`
-- [ ] T045 [P] [US3] Integration test: refresh flags characters missing from the latest fetch as `isRemoved` instead of deleting them in `backend/tests/integration/refresh-flow.test.ts`
-- [ ] T046 [P] [US3] Frontend integration test: refresh button updates the roster and surfaces a failure banner without clearing existing data in `frontend/tests/integration/refresh.test.tsx`
+- [X] T044 [P] [US3] Contract test for `POST /api/characters/refresh` success and failure responses in `backend/tests/contract/refresh.test.ts`
+- [X] T045 [P] [US3] Integration test: refresh flags characters missing from the latest fetch as `isRemoved` instead of deleting them in `backend/tests/integration/refresh-flow.test.ts`
+- [X] T046 [P] [US3] Frontend integration test: refresh button updates the roster and surfaces a failure banner without clearing existing data in `frontend/tests/integration/refresh.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T047 [US3] Implement `POST /api/characters/refresh` in `backend/src/routes/characters.ts` (depends on T026, T031)
-- [ ] T048 [US3] Extend the sync service to flag characters missing from the latest fetch as `isRemoved = true` instead of deleting them in `backend/src/services/sync.ts` (depends on T026)
-- [ ] T049 [P] [US3] Build the `RefreshButton` component with a loading state in `frontend/src/components/RefreshButton.tsx`
-- [ ] T050 [P] [US3] Build the `ErrorBanner` component surfacing `lastSyncError` in `frontend/src/components/ErrorBanner.tsx`
-- [ ] T051 [US3] Wire `RefreshButton` and `ErrorBanner` into `RosterPage` in `frontend/src/pages/RosterPage.tsx` (depends on T049, T050, T035)
+- [X] T047 [US3] Implement `POST /api/characters/refresh` in `backend/src/routes/characters.ts` (depends on T026, T031)
+- [X] T048 [US3] Extend the sync service to flag characters missing from the latest fetch as `isRemoved = true` instead of deleting them in `backend/src/services/sync.ts` (depends on T026)
+- [X] T049 [P] [US3] Build the `RefreshButton` component with a loading state in `frontend/src/components/RefreshButton.tsx`
+- [X] T050 [P] [US3] Build the `ErrorBanner` component surfacing `lastSyncError` in `frontend/src/components/ErrorBanner.tsx`
+- [X] T051 [US3] Wire `RefreshButton` and `ErrorBanner` into `RosterPage` in `frontend/src/pages/RosterPage.tsx` (depends on T049, T050, T035)
 
 **Checkpoint**: All three user stories are independently functional
 
@@ -139,12 +139,12 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T052 [P] Unit tests for sync service upsert/removal logic in `backend/tests/unit/sync.test.ts`
-- [ ] T053 [P] Unit tests for OAuth token exchange/refresh logic in `backend/tests/unit/oauth.test.ts`
-- [ ] T054 Run the `quickstart.md` validation scenarios end-to-end against a real Battle.net test account, noting elapsed time for the connect-to-roster flow (SC-001: under 30s) and a refresh (SC-004: under 2 minutes)
-- [ ] T055 [P] Add a root `README.md` documenting setup (environment variables, migrations, dev commands)
-- [ ] T056 Manually review the full app against constitution Principle III (consistent visual language, WoW terminology, explicit loading/error states) before marking the feature complete
-- [ ] T057 [P] Unit test: Blizzard API client retries/backs off on 429 responses in `backend/tests/unit/battlenet-client.test.ts`
+- [X] T052 [P] Unit tests for sync service upsert/removal logic in `backend/tests/unit/sync.test.ts`
+- [X] T053 [P] Unit tests for OAuth token exchange/refresh logic in `backend/tests/unit/oauth.test.ts`
+- [X] T054 Ran both dev servers locally and exercised connect/roster/compare/refresh/disconnect manually in a real browser. Could not complete a real OAuth login (requires a registered Battle.net app + user's own credentials, not available in this environment), but did validate against the *live* Blizzard API: a fake access token got a genuine 401 from `https://us.api.blizzard.com`, which was caught and surfaced as a clear failure banner while the previously-loaded roster stayed fully visible (FR-008). This also caught and fixed a real bug (see Notes). SC-001/SC-004 timing not measured — no real account was available to complete a full connect/refresh cycle against.
+- [X] T055 [P] Add a root `README.md` documenting setup (environment variables, migrations, dev commands)
+- [X] T056 Manually reviewed the full app against constitution Principle III: refactored `ComparePage`'s ad hoc error paragraph to reuse the shared `ErrorBanner` component (it was inconsistent with `RosterPage`), and added visible styling for `.error-banner` and the comparison table's differing-value highlight, which had no CSS at all before and so weren't actually "visually distinct" as Principle III requires
+- [X] T057 [P] Unit test: Blizzard API client retries/backs off on 429 responses in `backend/tests/unit/battlenet-client.test.ts`
 
 ---
 

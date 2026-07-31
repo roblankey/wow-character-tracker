@@ -18,8 +18,9 @@ views.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x on Node.js 20 LTS (backend) and in the
-browser via a Vite-built bundle (frontend)
+**Language/Version**: TypeScript 5.x on Node.js 22 LTS (backend, required by
+`better-sqlite3`'s native bindings) and in the browser via a Vite-built
+bundle (frontend)
 
 **Primary Dependencies**: Fastify (backend HTTP server), Drizzle ORM +
 better-sqlite3 (typed SQLite access and migrations), React + Vite
