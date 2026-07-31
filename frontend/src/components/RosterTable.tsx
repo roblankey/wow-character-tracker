@@ -3,6 +3,7 @@ import type { CharacterDto } from '../api/client.js';
 
 export interface RosterTableProps {
   characters: CharacterDto[];
+  onSelectCharacter?: (character: CharacterDto) => void;
 }
 
 type SortKey =
@@ -29,7 +30,7 @@ function compare(a: CharacterDto, b: CharacterDto, key: SortKey): number {
   return String(aValue).localeCompare(String(bValue));
 }
 
-export function RosterTable({ characters }: RosterTableProps) {
+export function RosterTable({ characters, onSelectCharacter }: RosterTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -71,7 +72,12 @@ export function RosterTable({ characters }: RosterTableProps) {
       </thead>
       <tbody>
         {sortedCharacters.map((c) => (
-          <tr key={c.id} aria-label={c.name} data-removed={c.isRemoved}>
+          <tr
+            key={c.id}
+            aria-label={c.name}
+            data-removed={c.isRemoved}
+            onClick={() => onSelectCharacter?.(c)}
+          >
             <td>
               {c.name}
               {c.isRemoved ? ' (removed)' : ''}

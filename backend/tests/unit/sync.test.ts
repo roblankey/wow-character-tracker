@@ -52,6 +52,7 @@ describe('syncCharacters', () => {
         level: 80,
         itemLevel: 489,
         activeSpec: 'Protection',
+        imageUrl: null,
         professions: [{ name: 'Blacksmithing', skillLevel: 100 }],
       },
     ]);
@@ -79,6 +80,7 @@ describe('syncCharacters', () => {
         level: 79,
         itemLevel: 480,
         activeSpec: 'Protection',
+        imageUrl: null,
         professions: [],
       },
     ]);
@@ -96,6 +98,7 @@ describe('syncCharacters', () => {
         level: 80,
         itemLevel: 489,
         activeSpec: 'Protection',
+        imageUrl: null,
         professions: [],
       },
     ]);
@@ -105,6 +108,49 @@ describe('syncCharacters', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]?.level).toBe(80);
     expect(rows[0]?.itemLevel).toBe(489);
+  });
+
+  it('persists imageUrl, and null when Blizzard has no media for the character', async () => {
+    const db = createTestDb();
+    const connection = await insertConnection(db);
+    vi.mocked(fetchFullCharacterRoster).mockResolvedValue([
+      {
+        battlenetCharacterId: 'char-1',
+        name: 'Thrallmar',
+        realmSlug: 'area-52',
+        realmName: 'Area 52',
+        faction: 'Horde',
+        class: 'Warrior',
+        race: 'Orc',
+        level: 80,
+        itemLevel: 489,
+        activeSpec: 'Protection',
+        imageUrl: 'https://render.example.com/thrallmar.jpg',
+        professions: [],
+      },
+      {
+        battlenetCharacterId: 'char-2',
+        name: 'NoImage',
+        realmSlug: 'area-52',
+        realmName: 'Area 52',
+        faction: 'Horde',
+        class: 'Mage',
+        race: 'Undead',
+        level: 10,
+        itemLevel: 0,
+        activeSpec: 'Unknown',
+        imageUrl: null,
+        professions: [],
+      },
+    ]);
+
+    await syncCharacters(db, config, connection.id);
+
+    const rows = await db.select().from(character);
+    const withImage = rows.find((r) => r.battlenetCharacterId === 'char-1');
+    const withoutImage = rows.find((r) => r.battlenetCharacterId === 'char-2');
+    expect(withImage?.imageUrl).toBe('https://render.example.com/thrallmar.jpg');
+    expect(withoutImage?.imageUrl).toBeNull();
   });
 
   it('flags a character absent from the latest fetch as removed', async () => {
@@ -122,6 +168,7 @@ describe('syncCharacters', () => {
         level: 80,
         itemLevel: 489,
         activeSpec: 'Protection',
+        imageUrl: null,
         professions: [],
       },
     ]);

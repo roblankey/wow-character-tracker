@@ -23,6 +23,7 @@ export interface CharacterDto {
   itemLevel: number;
   activeSpec: string;
   professions: Profession[];
+  imageUrl: string | null;
   isRemoved: boolean;
   updatedAt: string;
 }

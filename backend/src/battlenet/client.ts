@@ -90,6 +90,15 @@ interface CharacterProfessionsResponse {
   secondaries?: ProfessionEntry[];
 }
 
+interface CharacterMediaAsset {
+  key: string;
+  value: string;
+}
+
+interface CharacterMediaResponse {
+  assets?: CharacterMediaAsset[];
+}
+
 export interface FetchedCharacter {
   battlenetCharacterId: string;
   name: string;
@@ -102,6 +111,7 @@ export interface FetchedCharacter {
   itemLevel: number;
   activeSpec: string;
   professions: { name: string; skillLevel: number }[];
+  imageUrl: string | null;
 }
 
 export async function fetchAccountCharacters(
@@ -138,6 +148,27 @@ async function fetchCharacterProfessions(
 }
 
 /**
+ * Fetches a character's Blizzard render image URL. Prefers `main-raw` (the
+ * full character render without a frame); falls back to `avatar` if that
+ * asset isn't present. Returns null if Blizzard has no media for this
+ * character (handled by the caller via fetchCharacterDetail's 404 fallback,
+ * same as summary/professions).
+ */
+async function fetchCharacterMedia(
+  config: Config,
+  accessToken: string,
+  realmSlug: string,
+  characterName: string,
+): Promise<string | null> {
+  const url = `${apiHost(config.battlenet.region)}/profile/wow/character/${realmSlug}/${characterName.toLowerCase()}/character-media?namespace=profile-${config.battlenet.region}&locale=en_US`;
+  const body = (await blizzardFetch(url, accessToken)) as CharacterMediaResponse;
+  const assets = body.assets ?? [];
+  const mainRaw = assets.find((asset) => asset.key === 'main-raw');
+  const avatar = assets.find((asset) => asset.key === 'avatar');
+  return mainRaw?.value ?? avatar?.value ?? null;
+}
+
+/**
  * Fetches one character's detail (summary or professions), falling back to
  * `onNotFound` when Blizzard 404s. In practice Blizzard's profile endpoints
  * 404 for some characters even though they're listed in the account summary
@@ -158,9 +189,10 @@ async function fetchCharacterDetail<T>(request: () => Promise<T>, onNotFound: T)
 
 /**
  * Fetches the connected account's full WoW roster, enriching each character
- * with item level, active spec, and professions. Each character requires two
- * additional per-character API calls, so this is the main place rate limits
- * are hit; blizzardFetch's backoff keeps a large roster from failing outright.
+ * with item level, active spec, professions, and an image URL. Each
+ * character requires three additional per-character API calls, so this is
+ * the main place rate limits are hit; blizzardFetch's backoff keeps a large
+ * roster from failing outright.
  */
 export async function fetchFullCharacterRoster(
   config: Config,
@@ -170,7 +202,7 @@ export async function fetchFullCharacterRoster(
 
   const results: FetchedCharacter[] = [];
   for (const char of characters) {
-    const [summary, professions] = await Promise.all([
+    const [summary, professions, imageUrl] = await Promise.all([
       fetchCharacterDetail(
         () => fetchCharacterSummary(config, accessToken, char.realm.slug, char.name),
         {} as CharacterSummaryResponse,
@@ -178,6 +210,10 @@ export async function fetchFullCharacterRoster(
       fetchCharacterDetail(
         () => fetchCharacterProfessions(config, accessToken, char.realm.slug, char.name),
         [] as { name: string; skillLevel: number }[],
+      ),
+      fetchCharacterDetail(
+        () => fetchCharacterMedia(config, accessToken, char.realm.slug, char.name),
+        null as string | null,
       ),
     ]);
 
@@ -193,6 +229,7 @@ export async function fetchFullCharacterRoster(
       itemLevel: summary.equipped_item_level ?? 0,
       activeSpec: summary.active_spec?.name ?? 'Unknown',
       professions,
+      imageUrl,
     });
   }
 
