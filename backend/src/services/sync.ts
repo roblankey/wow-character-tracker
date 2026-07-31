@@ -74,6 +74,7 @@ export async function syncCharacters(
         itemLevel: fetchedCharacter.itemLevel,
         activeSpec: fetchedCharacter.activeSpec,
         professions: JSON.stringify(fetchedCharacter.professions),
+        imageUrl: fetchedCharacter.imageUrl,
         isRemoved: false,
         updatedAt: now,
       };

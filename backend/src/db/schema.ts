@@ -34,6 +34,8 @@ export const character = sqliteTable(
     activeSpec: text('active_spec').notNull(),
     /** JSON-encoded array of { name: string; skillLevel: number } */
     professions: text('professions').notNull(),
+    /** Blizzard character-media render URL; null if Blizzard has no media for this character yet */
+    imageUrl: text('image_url'),
     isRemoved: integer('is_removed', { mode: 'boolean' }).notNull().default(false),
     updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
   },

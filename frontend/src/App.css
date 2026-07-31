@@ -127,3 +127,74 @@ th button {
 th button:hover {
   text-decoration: underline;
 }
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: rgba(128, 128, 128, 0.1);
+}
+
+@keyframes character-detail-panel-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.character-detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 50vw;
+  height: 100vh;
+  overflow-y: auto;
+  background: #1b1b1f;
+  border-left: 1px solid rgba(128, 128, 128, 0.3);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+  box-sizing: border-box;
+  animation: character-detail-panel-slide-in 0.25s ease-out;
+}
+
+.character-detail-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.character-detail-panel-header h2 {
+  margin: 0;
+}
+
+.character-detail-panel-header button {
+  background: none;
+  border: 1px solid rgba(128, 128, 128, 0.4);
+  color: inherit;
+  border-radius: 4px;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.character-detail-panel-header button:hover {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+.character-detail-panel img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.character-detail-removed {
+  color: #d33;
+  font-weight: 700;
+}

@@ -20,8 +20,8 @@
 
 **Purpose**: Schema change needed before any Blizzard-media or sync work can proceed
 
-- [ ] T001 Add a nullable `imageUrl` column to the `character` table in `backend/src/db/schema.ts`
-- [ ] T002 Generate and review the Drizzle migration for the new `image_url` column in `backend/src/db/migrations/` (depends on T001)
+- [X] T001 Add a nullable `imageUrl` column to the `character` table in `backend/src/db/schema.ts`
+- [X] T002 Generate and review the Drizzle migration for the new `image_url` column in `backend/src/db/migrations/` (depends on T001)
 
 ---
 
@@ -31,11 +31,11 @@
 
 **⚠️ CRITICAL**: No User Story 1 UI work can begin until this phase is complete — the panel has nothing to display without it
 
-- [ ] T003 [P] Implement `fetchCharacterMedia` (Blizzard `character-media` endpoint; use the `main-raw` asset, falling back to `avatar`; reuse the existing 404-tolerant `fetchCharacterDetail` helper) in `backend/src/battlenet/client.ts`
-- [ ] T004 Wire `fetchCharacterMedia` into `fetchFullCharacterRoster`'s per-character `Promise.all`, adding `imageUrl` to the `FetchedCharacter` shape in `backend/src/battlenet/client.ts` (depends on T003)
-- [ ] T005 Pass `imageUrl` through when upserting `Character` rows in `backend/src/services/sync.ts` (depends on T002, T004)
-- [ ] T006 Include `imageUrl` in the `GET /api/characters` response in `backend/src/routes/characters.ts` (depends on T005)
-- [ ] T007 [P] Add `imageUrl: string | null` to `CharacterDto` in `frontend/src/api/client.ts`
+- [X] T003 [P] Implement `fetchCharacterMedia` (Blizzard `character-media` endpoint; use the `main-raw` asset, falling back to `avatar`; reuse the existing 404-tolerant `fetchCharacterDetail` helper) in `backend/src/battlenet/client.ts`
+- [X] T004 Wire `fetchCharacterMedia` into `fetchFullCharacterRoster`'s per-character `Promise.all`, adding `imageUrl` to the `FetchedCharacter` shape in `backend/src/battlenet/client.ts` (depends on T003)
+- [X] T005 Pass `imageUrl` through when upserting `Character` rows in `backend/src/services/sync.ts` (depends on T002, T004)
+- [X] T006 Include `imageUrl` in the `GET /api/characters` response in `backend/src/routes/characters.ts` (depends on T005)
+- [X] T007 [P] Add `imageUrl: string | null` to `CharacterDto` in `frontend/src/api/client.ts`
 
 **Checkpoint**: `GET /api/characters` returns real (or `null`) `imageUrl` values — User Story 1 UI work can now begin
 
@@ -51,18 +51,18 @@
 
 > Write these tests FIRST, ensure they FAIL before implementation
 
-- [ ] T008 [P] [US1] Unit tests for `fetchCharacterMedia` — success, 404 → `null`, other errors propagate — in `backend/tests/unit/battlenet-client.test.ts`
-- [ ] T009 [P] [US1] Unit test: sync persists `imageUrl`, and stores `null` when Blizzard 404s, in `backend/tests/unit/sync.test.ts`
-- [ ] T010 [P] [US1] Contract test: `GET /api/characters` response includes `imageUrl` in `backend/tests/contract/characters.test.ts`
-- [ ] T011 [P] [US1] Frontend unit tests for `CharacterDetailPanel` — renders all tracked fields including professions, shows the image, shows a placeholder when `imageUrl` is `null` or the image fails to load, shows removed status for `isRemoved` characters — in `frontend/tests/unit/CharacterDetailPanel.test.tsx`
-- [ ] T012 [P] [US1] Frontend integration tests: clicking a row opens the panel for that character, clicking a different row switches it, clicking the same row again or the close control closes it, in `frontend/tests/integration/roster-page.test.tsx`
+- [X] T008 [P] [US1] Unit tests for `fetchCharacterMedia` — success, 404 → `null`, other errors propagate — in `backend/tests/unit/battlenet-client.test.ts`
+- [X] T009 [P] [US1] Unit test: sync persists `imageUrl`, and stores `null` when Blizzard 404s, in `backend/tests/unit/sync.test.ts`
+- [X] T010 [P] [US1] Contract test: `GET /api/characters` response includes `imageUrl` in `backend/tests/contract/characters.test.ts`
+- [X] T011 [P] [US1] Frontend unit tests for `CharacterDetailPanel` — renders all tracked fields including professions, shows the image, shows a placeholder when `imageUrl` is `null` or the image fails to load, shows removed status for `isRemoved` characters — in `frontend/tests/unit/CharacterDetailPanel.test.tsx`
+- [X] T012 [P] [US1] Frontend integration tests: clicking a row opens the panel for that character, clicking a different row switches it, clicking the same row again or the close control closes it, in `frontend/tests/integration/roster-page.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Build the `CharacterDetailPanel` component — name, class, race, faction, realm, level, item level, active spec, professions, character image with `onError`/loading-state handling and a placeholder, a close control, and a removed-status indicator — in `frontend/src/components/CharacterDetailPanel.tsx` (depends on T007)
-- [ ] T014 [US1] Add row click handling (an `onSelectCharacter` callback) to `RosterTable` in `frontend/src/components/RosterTable.tsx`
-- [ ] T015 [US1] Add `selectedCharacterId` state to `RosterPage`; wire row clicks to open/switch/toggle-close; render `CharacterDetailPanel` for the selected character in `frontend/src/pages/RosterPage.tsx` (depends on T013, T014)
-- [ ] T016 [US1] Add the slide-in-from-right, half-viewport-width CSS transition for the panel in `frontend/src/App.css` (depends on T013)
+- [X] T013 [US1] Build the `CharacterDetailPanel` component — name, class, race, faction, realm, level, item level, active spec, professions, character image with `onError`/loading-state handling and a placeholder, a close control, and a removed-status indicator — in `frontend/src/components/CharacterDetailPanel.tsx` (depends on T007)
+- [X] T014 [US1] Add row click handling (an `onSelectCharacter` callback) to `RosterTable` in `frontend/src/components/RosterTable.tsx`
+- [X] T015 [US1] Add `selectedCharacterId` state to `RosterPage`; wire row clicks to open/switch/toggle-close; render `CharacterDetailPanel` for the selected character in `frontend/src/pages/RosterPage.tsx` (depends on T013, T014)
+- [X] T016 [US1] Add the slide-in-from-right, half-viewport-width CSS transition for the panel in `frontend/src/App.css` (depends on T013)
 
 **Checkpoint**: User Story 1 is fully functional and independently testable
 
@@ -72,8 +72,8 @@
 
 **Purpose**: Final validation against a real account and UX consistency review
 
-- [ ] T017 [P] Run the `quickstart.md` validation scenarios end-to-end against a real Battle.net account, confirming the image actually loads from Blizzard's CDN and the placeholder appears for a character with no available media
-- [ ] T018 Manually review the panel against constitution Principle III (consistent visual language, WoW terminology, explicit loading/error states) before marking the feature complete
+- [X] T017 [P] Run the `quickstart.md` validation scenarios end-to-end against a real Battle.net account, confirming the image actually loads from Blizzard's CDN and the placeholder appears for a character with no available media
+- [X] T018 Manually review the panel against constitution Principle III (consistent visual language, WoW terminology, explicit loading/error states) before marking the feature complete
 
 ---
 

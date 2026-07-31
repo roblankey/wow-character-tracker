@@ -8,6 +8,7 @@ import { ConnectionStatus } from '../components/ConnectionStatus.js';
 import { RosterTable } from '../components/RosterTable.js';
 import { ErrorBanner } from '../components/ErrorBanner.js';
 import { RosterLogo } from '../components/RosterLogo.js';
+import { CharacterDetailPanel } from '../components/CharacterDetailPanel.js';
 
 export function RosterPage() {
   const [status, setStatus] = useState<ConnectionStatusDto | null>(null);
@@ -17,6 +18,7 @@ export function RosterPage() {
   const [disconnecting, setDisconnecting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -71,6 +73,10 @@ export function RosterPage() {
     }
   };
 
+  const handleSelectCharacter = (selected: CharacterDto) => {
+    setSelectedCharacterId((current) => (current === selected.id ? null : selected.id));
+  };
+
   const header = (
     <header className="site-header">
       <h1 className="site-title">
@@ -110,6 +116,7 @@ export function RosterPage() {
   // Blizzard (see the fallback in the backend's battlenet client) — hide
   // them rather than showing empty rows.
   const visibleCharacters = characters.filter((c) => c.itemLevel > 0);
+  const selectedCharacter = visibleCharacters.find((c) => c.id === selectedCharacterId) ?? null;
 
   return (
     <section>
@@ -121,7 +128,7 @@ export function RosterPage() {
           ) : null}
           {refreshError ? <ErrorBanner message={refreshError} /> : null}
           {visibleCharacters.length > 0 ? (
-            <RosterTable characters={visibleCharacters} />
+            <RosterTable characters={visibleCharacters} onSelectCharacter={handleSelectCharacter} />
           ) : (
             <p>No characters found on this account.</p>
           )}
@@ -129,6 +136,12 @@ export function RosterPage() {
       ) : (
         <p>No Battle.net account connected.</p>
       )}
+      {selectedCharacter ? (
+        <CharacterDetailPanel
+          character={selectedCharacter}
+          onClose={() => setSelectedCharacterId(null)}
+        />
+      ) : null}
     </section>
   );
 }

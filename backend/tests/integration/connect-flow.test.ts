@@ -60,6 +60,7 @@ describe('connect flow (real temp SQLite file, stubbed Blizzard client)', () => 
         itemLevel: 489,
         activeSpec: 'Protection',
         professions: [{ name: 'Blacksmithing', skillLevel: 100 }],
+        imageUrl: 'https://render.example.com/thrallmar.jpg',
       },
     ]);
 

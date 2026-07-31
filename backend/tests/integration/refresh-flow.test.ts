@@ -104,6 +104,7 @@ describe('refresh flow (real temp SQLite file, stubbed Blizzard client)', () => 
         itemLevel: 489,
         activeSpec: 'Protection',
         professions: [],
+        imageUrl: null,
       },
     ]);
 
