@@ -1,9 +1,10 @@
 # Phase 1 Data Model: Battle.net Character Comparison
 
 Two persisted entities, both owned by the backend's SQLite database. There
-is no separate "Comparison" or "User" entity — comparison is computed at
-read time from `Character` rows (see quickstart.md), and the app is
-single-user by design (see research.md).
+is no separate "User" entity — the app is single-user by design (see
+research.md). Side-by-side comparison (and the derived, non-persisted
+"Comparison" concept originally documented here) was removed after
+implementation — see spec.md's Scope note.
 
 ## BattleNetConnection
 
@@ -16,8 +17,7 @@ Exactly zero or one row exists at a time (FR-010).
 | `battlenetAccountId` | text | Stable account identifier from Blizzard's OAuth `userinfo` response |
 | `region` | text | Region the account authorized against (e.g. `us`, `eu`); used as-is, not switchable (per spec Assumptions) |
 | `accessToken` | text | Encrypted at rest; backend-only, never serialized to the frontend |
-| `refreshToken` | text | Encrypted at rest; backend-only |
-| `tokenExpiresAt` | datetime | Used to decide whether to refresh the OAuth token before a Blizzard API call |
+| `tokenExpiresAt` | datetime | Used to detect an expired token before a Blizzard API call; there is no `refreshToken` — see note below |
 | `connectedAt` | datetime | When the authorization was first completed |
 | `lastSyncedAt` | datetime, nullable | Timestamp of the last successful roster sync |
 | `lastSyncStatus` | text enum: `success` \| `failure` \| `never_run` | Drives the loading/error state required by FR-008 |
@@ -30,6 +30,13 @@ concept). `region` must be a Blizzard-supported region code.
 **Lifecycle**: created on successful OAuth callback; deleted when the user
 disconnects (FR-009), which also cascades to delete all `Character` rows
 for that connection.
+
+**Note (discovered against the live Blizzard API)**: Battle.net's
+user-authorization flow does not issue a refresh token, so there is no
+`refreshToken` field to store. When `tokenExpiresAt` has passed, a sync
+fails with a clear "reconnect your account" error (FR-008) rather than
+silently renewing — reconnecting creates a fresh row via the same
+FR-010 replace-existing-connection path used for the initial connect.
 
 ## Character
 
@@ -67,14 +74,3 @@ unique per `connectionId`.
   `isRemoved` reset to `false` and fields refreshed.
 - Connection disconnected (FR-009) → all `Character` rows for that
   connection are deleted via cascade.
-
-## Derived, non-persisted concept: Comparison
-
-A comparison is computed on request from two or more `Character` rows
-already in the roster: for each tracked attribute (`level`, `itemLevel`,
-`activeSpec`, `professions`), values are grouped by character and any
-attribute where the selected characters' values are not all equal is
-flagged as "differing" for highlighting (FR-004). No comparison result is
-stored — it is cheap to recompute from already-fetched data, per the
-constitution's Performance principle (no unnecessary storage/roundtrips
-for something derivable client-side).

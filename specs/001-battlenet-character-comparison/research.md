@@ -61,12 +61,11 @@ most common combination for a small TS SPA, has mature component-testing
 support (React Testing Library) that fits the Testing Standards
 principle, and its component model naturally supports the constitution's
 requirement for one consistent, reusable visual language across every
-view (shared `RosterTable`/`ComparisonView` components rather than
-per-page one-offs).
+view (a shared `RosterTable` component rather than per-page one-offs).
 
 **Alternatives considered**: Vue and Svelte — both viable, but React was
-chosen for its larger ecosystem of accessible table/comparison UI
-patterns, which reduces the risk of ad hoc, inconsistent UI work.
+chosen for its larger ecosystem of accessible table UI patterns, which
+reduces the risk of ad hoc, inconsistent UI work.
 
 ## Test runner
 
@@ -86,14 +85,27 @@ configuration than Vitest for this stack.
 **Decision**: Backend performs the OAuth 2.0 Authorization Code flow
 against Battle.net (not Client Credentials — account-scoped character
 data requires the user to authorize access to their own account). The
-backend exchanges the code for access/refresh tokens, stores them in
-SQLite, and is the only part of the system that ever calls the Blizzard
-Game Data/Profile APIs. Character data is fetched only at connect-time
-and on explicit user-triggered refresh (FR-005) — never polled — and each
+backend exchanges the code for an access token, stores it in SQLite, and
+is the only part of the system that ever calls the Blizzard Game
+Data/Profile APIs. Character data is fetched only at connect-time and on
+explicit user-triggered refresh (FR-005) — never polled — and each
 refresh upserts the latest snapshot per FR-006 (no history retained).
 Characters returned by the account endpoint that are missing from a new
 sync are flagged as removed rather than deleted outright, so the roster
 can explain what happened (FR-007) instead of silently vanishing rows.
+
+**Confirmed against the live Blizzard API during implementation**:
+Battle.net's user-authorization token response does not include a
+`refresh_token` — there is no refresh-token grant available for this
+flow. An expired access token can't be silently renewed; a sync against
+an expired token fails with a clear "reconnect your account" error
+(FR-008), and reconnecting goes through the same FR-010
+replace-existing-connection path already used for the initial connect.
+This also means the OAuth callback redirect must be an absolute URL to
+the frontend's origin, not a relative path — Blizzard redirects the
+browser directly to the backend's callback URL, bypassing the frontend
+dev proxy, so a relative redirect resolves against the backend's own
+origin instead.
 
 **Rationale**: Matches the constitution's Performance principle (no
 redundant/polling calls, on-demand only) and the spec's explicit FR-005
