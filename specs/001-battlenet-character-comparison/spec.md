@@ -151,8 +151,10 @@ appears in the roster and comparison view.
 - **Character**: A single WoW character belonging to the connected account
   — name, class, race, faction, realm, level, item level, specialization,
   and professions.
-- **Comparison View**: An on-demand grouping of two or more characters from
-  the roster with their differing tracked attributes highlighted.
+- **Comparison View**: A derived, on-demand grouping of two or more
+  characters from the roster with their differing tracked attributes
+  highlighted — computed at view time from Character data, not stored as
+  its own record.
 
 ## Success Criteria *(mandatory)*
 
@@ -186,3 +188,7 @@ appears in the roster and comparison view.
 - The comparison in this feature is a snapshot of current state only; time-
   series/progression tracking of a character's history is out of scope and
   could be a future enhancement.
+- Per-character data staleness (e.g., a character not played in months) is
+  not visually distinguished from freshly-synced characters; only the
+  account-level `lastSyncedAt`/`lastSyncStatus` indicates how recent the
+  last sync was.
