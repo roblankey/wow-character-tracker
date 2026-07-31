@@ -1,4 +1,4 @@
-# wow-character-tracker
+# WoWster Character Tracker
 
 Connect your Battle.net account, see your World of Warcraft characters in one
 roster, compare them side-by-side, and refresh on demand. Click a character

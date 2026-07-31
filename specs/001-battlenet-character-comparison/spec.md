@@ -23,6 +23,10 @@ roster view (FR-013), and a clearly Battle.net-branded connect action
 `contracts/api.md` — characters and their professions are still fetched
 and stored exactly as before; only what the roster view displays changed.
 
+**Scope note (2026-07-31, rebrand)**: The app was renamed from "Roster" to
+"WoWster" — the wordmark, browser tab title, and project name were updated
+accordingly. Cosmetic only; no functional or API change.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Connect account and view roster (Priority: P1)

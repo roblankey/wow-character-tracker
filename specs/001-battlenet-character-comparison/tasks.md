@@ -173,6 +173,7 @@ contract changes.
 - [X] T062 [US1] Replace the plain "Connect Battle.net account" link with a Battle.net-branded button (`frontend/src/components/BattleNetIcon.tsx`, styling in `ConnectionStatus.tsx`/`App.css`) positioned in a header bar, satisfying FR-014
 - [X] T063 [US1] Move the Refresh and Disconnect actions into the same header bar as the connect/account-status area, in `ConnectionStatus.tsx` and `RosterPage.tsx` (UX consistency, not a new FR)
 - [X] T064 [P] Add a stylized SVG wordmark (`frontend/src/components/RosterLogo.tsx`) replacing the plain-text "Roster" heading (cosmetic; no FR — no image-generation tool was available, so this is a hand-built SVG rather than a generated raster image)
+- [X] T065 [P] Rebrand the app from "Roster" to "WoWster": updated the wordmark text in `frontend/src/components/RosterLogo.tsx`, the browser tab title in `frontend/index.html`, and the project name in `README.md` (cosmetic; no FR)
 
 ---
 
