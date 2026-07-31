@@ -4,6 +4,90 @@
   padding: 1.5rem;
 }
 
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+.site-title {
+  margin: 0;
+  line-height: 0;
+}
+
+.roster-logo {
+  height: 36px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.battlenet-login-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(180deg, #009aef, #0072c6);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+  white-space: nowrap;
+}
+
+.battlenet-login-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, #17a7ff, #0080da);
+}
+
+.account-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.account-info {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.disconnect-link,
+.refresh-button {
+  background: none;
+  border: 1px solid rgba(128, 128, 128, 0.4);
+  color: inherit;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.disconnect-link:hover,
+.refresh-button:hover:not(:disabled) {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+.refresh-button {
+  border-color: #0072c6;
+  color: #4fb6ff;
+}
+
+.refresh-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .error-banner {
   border: 1px solid #d33;
   background: rgba(221, 51, 51, 0.1);
@@ -23,4 +107,23 @@ td {
   text-align: left;
   padding: 0.4rem 0.75rem;
   border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+th {
+  white-space: nowrap;
+}
+
+th button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+th button:hover {
+  text-decoration: underline;
 }

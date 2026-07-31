@@ -159,6 +159,23 @@ selection checkboxes and "Compare selected" link were also removed.
 
 ---
 
+## Phase 7: Post-launch UI refinements (FR-011–FR-014)
+
+**Purpose**: Requirements added after the initial roster view shipped and
+was exercised against a real Battle.net account — see spec.md's
+"UI refinements" scope note. All display-layer only; no backend/API
+contract changes.
+
+- [X] T058 [US1] Implement column sorting (any header, toggle asc/desc, name ascending by default) in `frontend/src/components/RosterTable.tsx`, satisfying FR-011
+- [X] T059 [P] [US1] Unit tests for default sort and header-click sorting in `frontend/tests/unit/RosterTable.test.tsx`
+- [X] T060 [US1] Filter characters with `itemLevel === 0` out of the displayed roster in `frontend/src/pages/RosterPage.tsx`, satisfying FR-012
+- [X] T061 [US1] Remove the Professions column from `frontend/src/components/RosterTable.tsx`, satisfying FR-013
+- [X] T062 [US1] Replace the plain "Connect Battle.net account" link with a Battle.net-branded button (`frontend/src/components/BattleNetIcon.tsx`, styling in `ConnectionStatus.tsx`/`App.css`) positioned in a header bar, satisfying FR-014
+- [X] T063 [US1] Move the Refresh and Disconnect actions into the same header bar as the connect/account-status area, in `ConnectionStatus.tsx` and `RosterPage.tsx` (UX consistency, not a new FR)
+- [X] T064 [P] Add a stylized SVG wordmark (`frontend/src/components/RosterLogo.tsx`) replacing the plain-text "Roster" heading (cosmetic; no FR — no image-generation tool was available, so this is a hand-built SVG rather than a generated raster image)
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

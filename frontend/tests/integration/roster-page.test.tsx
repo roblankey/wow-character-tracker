@@ -26,7 +26,7 @@ describe('RosterPage', () => {
 
     render(<RosterPage />);
 
-    expect(await screen.findByRole('link', { name: /connect/i })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: /log in/i })).toHaveAttribute(
       'href',
       '/api/connection/authorize',
     );
@@ -87,6 +87,6 @@ describe('RosterPage', () => {
     await userEvent.click(disconnectButton);
 
     await waitFor(() => expect(apiClient.disconnect).toHaveBeenCalled());
-    expect(await screen.findByRole('link', { name: /connect/i })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /log in/i })).toBeInTheDocument();
   });
 });

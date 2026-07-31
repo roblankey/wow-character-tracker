@@ -6,8 +6,8 @@ import {
 } from '../api/client.js';
 import { ConnectionStatus } from '../components/ConnectionStatus.js';
 import { RosterTable } from '../components/RosterTable.js';
-import { RefreshButton } from '../components/RefreshButton.js';
 import { ErrorBanner } from '../components/ErrorBanner.js';
+import { RosterLogo } from '../components/RosterLogo.js';
 
 export function RosterPage() {
   const [status, setStatus] = useState<ConnectionStatusDto | null>(null);
@@ -61,8 +61,8 @@ export function RosterPage() {
     try {
       await apiClient.refreshCharacters();
       // Reload connection + roster: a Blizzard-side failure is reflected in
-      // the connection's lastSyncStatus/lastSyncError (surfaced by
-      // ConnectionStatus) without ever clearing the roster below.
+      // the connection's lastSyncStatus/lastSyncError (surfaced below)
+      // without ever clearing the roster below.
       await load();
     } catch (err) {
       setRefreshError(err instanceof Error ? err.message : 'Failed to refresh.');
@@ -71,10 +71,27 @@ export function RosterPage() {
     }
   };
 
+  const header = (
+    <header className="site-header">
+      <h1 className="site-title">
+        <RosterLogo />
+      </h1>
+      {status ? (
+        <ConnectionStatus
+          status={status}
+          onDisconnect={handleDisconnect}
+          disconnecting={disconnecting}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+        />
+      ) : null}
+    </header>
+  );
+
   if (loading) {
     return (
       <section>
-        <h1>Roster</h1>
+        {header}
         <p>Loading…</p>
       </section>
     );
@@ -83,33 +100,35 @@ export function RosterPage() {
   if (error) {
     return (
       <section>
-        <h1>Roster</h1>
+        {header}
         <ErrorBanner message={error} />
       </section>
     );
   }
 
+  // Characters with no item level have no usable profile data yet from
+  // Blizzard (see the fallback in the backend's battlenet client) — hide
+  // them rather than showing empty rows.
+  const visibleCharacters = characters.filter((c) => c.itemLevel > 0);
+
   return (
     <section>
-      <h1>Roster</h1>
-      {status ? (
-        <ConnectionStatus
-          status={status}
-          onDisconnect={handleDisconnect}
-          disconnecting={disconnecting}
-        />
-      ) : null}
+      {header}
       {status?.connected ? (
         <>
-          <RefreshButton onRefresh={handleRefresh} refreshing={refreshing} />
+          {status.lastSyncStatus === 'failure' && status.lastSyncError ? (
+            <ErrorBanner message={`Last refresh failed: ${status.lastSyncError}`} />
+          ) : null}
           {refreshError ? <ErrorBanner message={refreshError} /> : null}
-          {characters.length > 0 ? (
-            <RosterTable characters={characters} />
+          {visibleCharacters.length > 0 ? (
+            <RosterTable characters={visibleCharacters} />
           ) : (
             <p>No characters found on this account.</p>
           )}
         </>
-      ) : null}
+      ) : (
+        <p>No Battle.net account connected.</p>
+      )}
     </section>
   );
 }

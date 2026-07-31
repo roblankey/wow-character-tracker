@@ -14,6 +14,15 @@ implementation at the user's request. This spec is kept as the historical
 record of the original request; the sections below reflect the feature's
 current, reduced scope — roster tracking only, no comparison view.
 
+**Scope note (2026-07-31, UI refinements)**: After the roster view shipped
+and was exercised against a real Battle.net account, several display-layer
+requirements were added: sortable columns (FR-011), hiding characters
+Blizzard hasn't indexed yet (FR-012), dropping professions from the
+roster view (FR-013), and a clearly Battle.net-branded connect action
+(FR-014). None of these change the backend API contract in
+`contracts/api.md` — characters and their professions are still fetched
+and stored exactly as before; only what the roster view displays changed.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Connect account and view roster (Priority: P1)
@@ -42,6 +51,14 @@ actually has in-game.
 3. **Given** a user has already connected their account, **When** they
    revisit the roster, **Then** the previously retrieved characters are
    still shown without requiring re-authorization.
+4. **Given** a user has not connected a Battle.net account, **When** they
+   view the page, **Then** they see a clearly Battle.net-branded connect
+   action (not a plain text link) so it's unambiguous what service they're
+   authorizing with.
+5. **Given** a roster with two or more characters, **When** the user clicks
+   a column header, **Then** the roster re-sorts by that column ascending;
+   clicking the same header again reverses it to descending. The roster is
+   sorted by name ascending by default.
 
 ---
 
@@ -81,6 +98,10 @@ appears in the roster.
 - What happens if the user revokes the app's access to their Battle.net
   account? The system MUST stop retrieving new data and inform the user
   their connection is no longer active.
+- How does the system handle a character Blizzard hasn't indexed profile
+  data for yet (observed in practice for low-activity characters, which
+  come back from Blizzard with no item level)? The roster MUST exclude
+  these rather than showing broken/placeholder rows (FR-012).
 
 ## Requirements *(mandatory)*
 
@@ -90,10 +111,12 @@ appears in the roster.
   Battle.net account so the system can retrieve their World of Warcraft
   characters on that account.
 - **FR-002**: System MUST display all WoW characters found on the connected
-  account in a single roster view, showing at minimum each character's
-  name, class, realm, and faction.
-- **FR-003**: System MUST retrieve and display, for each character: level,
-  equipped item level, active specialization, and professions.
+  account that have usable profile data (see FR-012) in a single roster
+  view, showing each character's name, class, race, faction, realm, level,
+  equipped item level, and active specialization.
+- **FR-003**: System MUST retrieve, for each character, level, equipped
+  item level, active specialization, and professions; professions are
+  retrieved and stored but not shown in the roster view (FR-013).
 - **FR-005**: System MUST let the user manually trigger a refresh that
   re-fetches the latest character data from the connected Battle.net
   account.
@@ -112,6 +135,17 @@ appears in the roster.
   character data for that account.
 - **FR-010**: System MUST support exactly one connected Battle.net account
   per user in this feature.
+- **FR-011**: System MUST let the user sort the roster by clicking any
+  displayed column's header; a second click on the same column reverses
+  the sort direction. The roster MUST be sorted by name ascending by
+  default.
+- **FR-012**: System MUST exclude characters with no usable profile data
+  (observed in practice as an item level of 0, meaning Blizzard has not
+  yet indexed that character) from the displayed roster, rather than
+  showing broken or placeholder rows.
+- **FR-013**: System MUST NOT display professions in the roster view.
+- **FR-014**: System MUST present the Battle.net connect action as a
+  clearly branded, recognizable button rather than a plain text link.
 
 FR-004 numbering is intentionally retired, not reused, so it isn't
 confused with a still-active requirement — it covered the removed
@@ -124,7 +158,9 @@ side-by-side comparison capability.
   successfully synced.
 - **Character**: A single WoW character belonging to the connected account
   — name, class, race, faction, realm, level, item level, specialization,
-  and professions.
+  and professions. Professions are stored but not shown in the roster
+  view (FR-013); characters with an item level of 0 are stored but
+  excluded from the displayed roster (FR-012).
 
 ## Success Criteria *(mandatory)*
 
@@ -133,7 +169,8 @@ side-by-side comparison capability.
 - **SC-001**: A user can connect their Battle.net account and see their
   full character roster appear in under 30 seconds.
 - **SC-003**: 100% of the WoW characters present on a connected Battle.net
-  account appear correctly in the roster after connecting.
+  account that have usable Blizzard profile data (item level > 0) appear
+  correctly in the roster after connecting.
 - **SC-004**: A requested refresh completes and reflects updated in-game
   progress within 2 minutes.
 
@@ -165,6 +202,12 @@ SC-002 numbering is intentionally retired for the same reason as FR-004.
   requires the user to reconnect rather than being silently renewed.
 - Some characters listed in the account summary may 404 on Blizzard's
   per-character profile/professions endpoints (observed against the live
-  API for low-activity characters); those characters still appear in the
-  roster with default/unknown values for the fields that couldn't be
-  fetched, rather than the whole sync failing.
+  API for low-activity characters); those characters are still stored
+  with default/unknown values for the fields that couldn't be fetched,
+  rather than the whole sync failing — but per FR-012 they're then
+  excluded from the *displayed* roster, since an item level of 0 is used
+  as the signal that Blizzard hasn't indexed that character yet. This is
+  a pragmatic proxy (Blizzard doesn't expose an explicit "indexed" flag)
+  and would incorrectly hide a real, legitimately-0-item-level character
+  if one existed — accepted as a reasonable trade-off since a fresh
+  level-1 character has no meaningful roster data to show anyway.

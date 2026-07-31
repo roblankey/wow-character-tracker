@@ -1,36 +1,52 @@
 import type { ConnectionStatus as ConnectionStatusDto } from '../api/client.js';
 import { apiClient } from '../api/client.js';
-import { ErrorBanner } from './ErrorBanner.js';
+import { BattleNetIcon } from './BattleNetIcon.js';
+import { RefreshButton } from './RefreshButton.js';
 
 export interface ConnectionStatusProps {
   status: ConnectionStatusDto;
   onDisconnect: () => void;
   disconnecting: boolean;
+  onRefresh: () => void;
+  refreshing: boolean;
 }
 
-export function ConnectionStatus({ status, onDisconnect, disconnecting }: ConnectionStatusProps) {
+export function ConnectionStatus({
+  status,
+  onDisconnect,
+  disconnecting,
+  onRefresh,
+  refreshing,
+}: ConnectionStatusProps) {
   if (!status.connected) {
     return (
-      <div className="connection-status">
-        <p>No Battle.net account connected.</p>
-        <a href={apiClient.authorizeUrl}>Connect Battle.net account</a>
-      </div>
+      <a
+        href={apiClient.authorizeUrl}
+        className="battlenet-login-button"
+        aria-label="Log in with Battle.net"
+      >
+        <BattleNetIcon />
+        Log In
+      </a>
     );
   }
 
   return (
-    <div className="connection-status">
-      <p>
+    <div className="account-area">
+      <span className="account-info">
         Connected ({status.region}
         {status.lastSyncedAt
           ? ` · last synced ${new Date(status.lastSyncedAt).toLocaleString()}`
           : ''}
         )
-      </p>
-      {status.lastSyncStatus === 'failure' && status.lastSyncError ? (
-        <ErrorBanner message={`Last refresh failed: ${status.lastSyncError}`} />
-      ) : null}
-      <button type="button" onClick={onDisconnect} disabled={disconnecting}>
+      </span>
+      <RefreshButton onRefresh={onRefresh} refreshing={refreshing} />
+      <button
+        type="button"
+        className="disconnect-link"
+        onClick={onDisconnect}
+        disabled={disconnecting}
+      >
         {disconnecting ? 'Disconnecting…' : 'Disconnect'}
       </button>
     </div>
