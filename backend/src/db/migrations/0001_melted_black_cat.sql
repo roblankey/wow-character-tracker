@@ -1,0 +1,1 @@
+ALTER TABLE `battlenet_connection` DROP COLUMN `refresh_token`;

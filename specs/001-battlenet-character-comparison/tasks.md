@@ -8,6 +8,8 @@
 
 **Organization**: Tasks are grouped by user story (from spec.md) to enable independent implementation and testing of each story.
 
+**Scope note (2026-07-31)**: Phase 4 (User Story 2, side-by-side comparison) was removed from the app after being fully implemented — see that phase's header for details.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -89,6 +91,15 @@
 ---
 
 ## Phase 4: User Story 2 - Compare characters side-by-side (Priority: P2)
+
+**⚠️ REMOVED (2026-07-31)**: This phase was fully implemented and
+verified, then removed from the app at the user's request after the
+feature was working end-to-end. The task checkboxes below are kept
+checked as an accurate historical record of what was built — see
+spec.md's Scope note for the corresponding requirements change (FR-004
+and SC-002 retired). `frontend/src/pages/ComparePage.tsx`,
+`ComparisonView.tsx`, and `api/compare.ts` no longer exist; the roster's
+selection checkboxes and "Compare selected" link were also removed.
 
 **Goal**: A user can select two or more characters from the roster and see their differing attributes highlighted.
 

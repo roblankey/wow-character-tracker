@@ -8,6 +8,12 @@
 
 **Input**: User description: "as a world of warcraft player, i want to track the characters on my Battle.net account, so that i can easily see differences between them"
 
+**Scope note (2026-07-31)**: The side-by-side comparison capability
+(originally User Story 2 / FR-004 / SC-002) was removed after
+implementation at the user's request. This spec is kept as the historical
+record of the original request; the sections below reflect the feature's
+current, reduced scope — roster tracking only, no comparison view.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Connect account and view roster (Priority: P1)
@@ -16,9 +22,9 @@ As a WoW player, I want to connect my Battle.net account so that all of my
 characters are automatically pulled into one roster, instead of me manually
 listing them.
 
-**Why this priority**: Without a roster of characters pulled from the
-account, there is nothing to compare. This is the foundation every other
-story depends on.
+**Why this priority**: This is the foundation the rest of the feature
+depends on — without a roster pulled from the account, there is nothing to
+track.
 
 **Independent Test**: Can be fully tested by connecting a Battle.net account
 and verifying the resulting roster matches the characters that account
@@ -39,48 +45,17 @@ actually has in-game.
 
 ---
 
-### User Story 2 - Compare characters side-by-side (Priority: P2)
-
-As a WoW player, I want to see my characters side-by-side so that I can
-quickly spot how they differ from one another.
-
-**Why this priority**: This is the stated reason the user wants tracking in
-the first place — the roster alone doesn't deliver the "see differences"
-value on its own.
-
-**Independent Test**: Can be fully tested by selecting two or more
-characters from the roster and confirming the comparison view highlights
-attributes where their values differ.
-
-**Acceptance Scenarios**:
-
-1. **Given** a roster with two or more characters, **When** the user opens
-   the comparison view, **Then** the system displays the tracked attributes
-   for each character side-by-side with differing values visually
-   highlighted.
-2. **Given** a roster with only one character, **When** the user opens the
-   comparison view, **Then** the system explains that at least two
-   characters are needed to compare, rather than showing a broken or empty
-   view.
-3. **Given** two characters with identical values for every tracked
-   attribute, **When** the user compares them, **Then** the system
-   indicates there are no differences rather than showing a misleading
-   empty highlight state.
-
----
-
-### User Story 3 - Refresh character data (Priority: P3)
+### User Story 2 - Refresh character data (Priority: P2)
 
 As a WoW player, I want to refresh my tracked character data on demand so
-that comparisons reflect my most recent play session.
+that my roster reflects my most recent play session.
 
-**Why this priority**: Useful once roster and comparison exist, but the
-feature still delivers value with a one-time snapshot even before refresh
-is used.
+**Why this priority**: Useful once the roster exists, but the feature
+still delivers value with a one-time snapshot even before refresh is used.
 
 **Independent Test**: Can be fully tested by changing something about a
 character in-game, requesting a refresh, and confirming the updated value
-appears in the roster and comparison view.
+appears in the roster.
 
 **Acceptance Scenarios**:
 
@@ -99,8 +74,6 @@ appears in the roster and comparison view.
 - What happens when a character has been deleted, renamed, or transferred
   off the connected account since the last sync? The roster MUST reflect
   its removal or renaming rather than showing stale, orphaned entries.
-- How does the system handle a Battle.net account with only one WoW
-  character (nothing to compare against)?
 - What happens if the Battle.net API is unavailable, rate-limited, or
   returns partial data during a sync?
 - How does the system handle a character that hasn't logged in for a long
@@ -121,9 +94,6 @@ appears in the roster and comparison view.
   name, class, realm, and faction.
 - **FR-003**: System MUST retrieve and display, for each character: level,
   equipped item level, active specialization, and professions.
-- **FR-004**: System MUST let the user select two or more characters from
-  the roster and view them side-by-side, with attributes that differ
-  between the selected characters visually highlighted.
 - **FR-005**: System MUST let the user manually trigger a refresh that
   re-fetches the latest character data from the connected Battle.net
   account.
@@ -143,6 +113,10 @@ appears in the roster and comparison view.
 - **FR-010**: System MUST support exactly one connected Battle.net account
   per user in this feature.
 
+FR-004 numbering is intentionally retired, not reused, so it isn't
+confused with a still-active requirement — it covered the removed
+side-by-side comparison capability.
+
 ### Key Entities
 
 - **Battle.net Account Connection**: The authorized link between a user and
@@ -151,10 +125,6 @@ appears in the roster and comparison view.
 - **Character**: A single WoW character belonging to the connected account
   — name, class, race, faction, realm, level, item level, specialization,
   and professions.
-- **Comparison View**: A derived, on-demand grouping of two or more
-  characters from the roster with their differing tracked attributes
-  highlighted — computed at view time from Character data, not stored as
-  its own record.
 
 ## Success Criteria *(mandatory)*
 
@@ -162,13 +132,12 @@ appears in the roster and comparison view.
 
 - **SC-001**: A user can connect their Battle.net account and see their
   full character roster appear in under 30 seconds.
-- **SC-002**: A user can identify at least one meaningful difference
-  between two of their characters within 10 seconds of opening the
-  comparison view.
 - **SC-003**: 100% of the WoW characters present on a connected Battle.net
   account appear correctly in the roster after connecting.
 - **SC-004**: A requested refresh completes and reflects updated in-game
   progress within 2 minutes.
+
+SC-002 numbering is intentionally retired for the same reason as FR-004.
 
 ## Assumptions
 
@@ -182,13 +151,20 @@ appears in the roster and comparison view.
 - Character data is refreshed on-demand rather than continuously in real
   time, consistent with the Blizzard API's polling model (no push/webhook
   updates are available).
-- "Differences between characters" means comparing characters on the same
-  connected account against each other, not against other players'
-  characters.
-- The comparison in this feature is a snapshot of current state only; time-
+- The roster in this feature is a snapshot of current state only; time-
   series/progression tracking of a character's history is out of scope and
   could be a future enhancement.
 - Per-character data staleness (e.g., a character not played in months) is
   not visually distinguished from freshly-synced characters; only the
   account-level `lastSyncedAt`/`lastSyncStatus` indicates how recent the
   last sync was.
+- Side-by-side character comparison is out of scope (removed post-
+  implementation); the roster is a flat list of characters only.
+- Battle.net's user-authorization OAuth flow does not issue a refresh
+  token (confirmed against the live API); an expired access token
+  requires the user to reconnect rather than being silently renewed.
+- Some characters listed in the account summary may 404 on Blizzard's
+  per-character profile/professions endpoints (observed against the live
+  API for low-activity characters); those characters still appear in the
+  roster with default/unknown values for the fields that couldn't be
+  fetched, rather than the whole sync failing.

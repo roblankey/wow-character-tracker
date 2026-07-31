@@ -9,13 +9,11 @@ function oauthHost(region: string): string {
 
 export interface TokenResult {
   accessToken: string;
-  refreshToken: string;
   expiresAt: Date;
 }
 
 interface TokenResponseBody {
   access_token: string;
-  refresh_token?: string;
   expires_in: number;
   token_type: string;
 }
@@ -67,30 +65,23 @@ async function requestToken(config: Config, body: URLSearchParams): Promise<Toke
   }
 
   const json = (await response.json()) as TokenResponseBody;
-  if (!json.refresh_token) {
-    throw new BattleNetOAuthError('Battle.net token response did not include a refresh_token');
-  }
 
   return {
     accessToken: json.access_token,
-    refreshToken: json.refresh_token,
     expiresAt: new Date(Date.now() + json.expires_in * 1000),
   };
 }
 
+/**
+ * Battle.net's user-authorization flow does not issue refresh tokens — the
+ * only way to get a new access token is to have the user re-authorize
+ * (FR-010's reconnect-replaces-existing-connection flow doubles as this).
+ */
 export function exchangeCodeForTokens(config: Config, code: string): Promise<TokenResult> {
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
     redirect_uri: config.battlenet.redirectUri,
-  });
-  return requestToken(config, body);
-}
-
-export function refreshAccessToken(config: Config, refreshToken: string): Promise<TokenResult> {
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
   });
   return requestToken(config, body);
 }

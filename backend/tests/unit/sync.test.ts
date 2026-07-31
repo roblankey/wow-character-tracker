@@ -1,22 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { eq } from 'drizzle-orm';
 
-vi.mock('../../src/battlenet/oauth.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../src/battlenet/oauth.js')>();
-  return {
-    ...actual,
-    refreshAccessToken: vi.fn(),
-  };
-});
-
 vi.mock('../../src/battlenet/client.js', () => ({
   fetchFullCharacterRoster: vi.fn(),
 }));
 
-import { refreshAccessToken } from '../../src/battlenet/oauth.js';
 import { fetchFullCharacterRoster } from '../../src/battlenet/client.js';
 import { battleNetConnection, character } from '../../src/db/schema.js';
-import { encryptSecret, decryptSecret } from '../../src/db/crypto.js';
+import { encryptSecret } from '../../src/db/crypto.js';
 import { syncCharacters } from '../../src/services/sync.js';
 import { createTestConfig, createTestDb } from '../helpers/testApp.js';
 
@@ -32,7 +23,6 @@ async function insertConnection(
       battlenetAccountId: 'acct-1',
       region: 'us',
       accessToken: encryptSecret('access-token', config.tokenEncryptionKey),
-      refreshToken: encryptSecret('refresh-token', config.tokenEncryptionKey),
       tokenExpiresAt: new Date(Date.now() + 3600_000),
       connectedAt: new Date(),
       lastSyncStatus: 'never_run',
@@ -145,24 +135,20 @@ describe('syncCharacters', () => {
     expect(rows[0]?.isRemoved).toBe(true);
   });
 
-  it('refreshes an expired access token and persists the new tokens before fetching', async () => {
+  it('fails clearly (rather than crashing) when the access token has expired', async () => {
     const db = createTestDb();
     const connection = await insertConnection(db, { tokenExpiresAt: new Date(Date.now() - 1000) });
-    vi.mocked(refreshAccessToken).mockResolvedValue({
-      accessToken: 'new-access',
-      refreshToken: 'new-refresh',
-      expiresAt: new Date(Date.now() + 3600_000),
-    });
-    vi.mocked(fetchFullCharacterRoster).mockResolvedValue([]);
 
-    await syncCharacters(db, config, connection.id);
+    const result = await syncCharacters(db, config, connection.id);
 
-    expect(refreshAccessToken).toHaveBeenCalledTimes(1);
+    expect(result.status).toBe('failure');
+    expect(result.error).toContain('reconnect');
+    expect(fetchFullCharacterRoster).not.toHaveBeenCalled();
     const [updated] = await db
       .select()
       .from(battleNetConnection)
       .where(eq(battleNetConnection.id, connection.id));
-    expect(decryptSecret(updated!.accessToken, config.tokenEncryptionKey)).toBe('new-access');
+    expect(updated?.lastSyncStatus).toBe('failure');
   });
 
   it('records a failure status and preserves the previous lastSyncedAt when the fetch throws', async () => {

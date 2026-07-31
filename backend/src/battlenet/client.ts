@@ -138,6 +138,25 @@ async function fetchCharacterProfessions(
 }
 
 /**
+ * Fetches one character's detail (summary or professions), falling back to
+ * `onNotFound` when Blizzard 404s. In practice Blizzard's profile endpoints
+ * 404 for some characters even though they're listed in the account summary
+ * (e.g. low-activity ones that haven't been indexed) — that's a per-character
+ * gap, not a reason to fail the whole account sync. Any other failure (auth,
+ * 5xx, network) still propagates so a real outage is still reported as one.
+ */
+async function fetchCharacterDetail<T>(request: () => Promise<T>, onNotFound: T): Promise<T> {
+  try {
+    return await request();
+  } catch (err) {
+    if (err instanceof BlizzardApiError && err.status === 404) {
+      return onNotFound;
+    }
+    throw err;
+  }
+}
+
+/**
  * Fetches the connected account's full WoW roster, enriching each character
  * with item level, active spec, and professions. Each character requires two
  * additional per-character API calls, so this is the main place rate limits
@@ -152,8 +171,14 @@ export async function fetchFullCharacterRoster(
   const results: FetchedCharacter[] = [];
   for (const char of characters) {
     const [summary, professions] = await Promise.all([
-      fetchCharacterSummary(config, accessToken, char.realm.slug, char.name),
-      fetchCharacterProfessions(config, accessToken, char.realm.slug, char.name),
+      fetchCharacterDetail(
+        () => fetchCharacterSummary(config, accessToken, char.realm.slug, char.name),
+        {} as CharacterSummaryResponse,
+      ),
+      fetchCharacterDetail(
+        () => fetchCharacterProfessions(config, accessToken, char.realm.slug, char.name),
+        [] as { name: string; skillLevel: number }[],
+      ),
     ]);
 
     results.push({

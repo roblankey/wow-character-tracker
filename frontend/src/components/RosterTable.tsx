@@ -2,18 +2,13 @@ import type { CharacterDto } from '../api/client.js';
 
 export interface RosterTableProps {
   characters: CharacterDto[];
-  selectedIds?: Set<number>;
-  onToggleSelect?: (id: number) => void;
 }
 
-export function RosterTable({ characters, selectedIds, onToggleSelect }: RosterTableProps) {
-  const selectable = Boolean(onToggleSelect);
-
+export function RosterTable({ characters }: RosterTableProps) {
   return (
     <table>
       <thead>
         <tr>
-          {selectable ? <th>Compare</th> : null}
           <th>Name</th>
           <th>Class</th>
           <th>Race</th>
@@ -28,16 +23,6 @@ export function RosterTable({ characters, selectedIds, onToggleSelect }: RosterT
       <tbody>
         {characters.map((c) => (
           <tr key={c.id} aria-label={c.name} data-removed={c.isRemoved}>
-            {selectable ? (
-              <td>
-                <input
-                  type="checkbox"
-                  aria-label={`Select ${c.name} for comparison`}
-                  checked={selectedIds?.has(c.id) ?? false}
-                  onChange={() => onToggleSelect?.(c.id)}
-                />
-              </td>
-            ) : null}
             <td>
               {c.name}
               {c.isRemoved ? ' (removed)' : ''}

@@ -10,8 +10,7 @@ API shapes referenced below.
 - A Battle.net developer application (client ID + secret) from
   https://develop.battle.net, with its OAuth redirect URI set to this
   app's `GET /api/connection/callback` endpoint
-- A WoW-owning Battle.net test account with at least two characters, to
-  validate the comparison view
+- A WoW-owning Battle.net test account
 
 ## Setup
 
@@ -39,20 +38,7 @@ Each scenario below maps to an acceptance scenario in `spec.md`.
 - Repeat with a test account that owns no WoW characters.
 - **Expect**: roster page shows an explicit empty state, not an error.
 
-### 2. Compare characters (User Story 2)
-
-- With a roster of 2+ characters, select two and open the comparison
-  view.
-- **Expect**: attributes that differ (level, item level, spec,
-  professions) are visually highlighted; attributes that match are not.
-- Select two characters with identical tracked attributes.
-- **Expect**: the view explicitly states there are no differences.
-- With only one character in the roster, attempt to open the comparison
-  view.
-- **Expect**: the app explains at least two characters are needed, rather
-  than showing a broken/empty comparison.
-
-### 3. Refresh data (User Story 3)
+### 2. Refresh data (User Story 2)
 
 - Change something about a character in-game (e.g., level up, equip
   higher item level gear).
@@ -66,7 +52,7 @@ Each scenario below maps to an acceptance scenario in `spec.md`.
   `lastSyncError`, but `GET /api/characters` still returns the last good
   data rather than an empty/broken response.
 
-### 4. Character removed from account (edge case)
+### 3. Character removed from account (edge case)
 
 - Using a test account, note a character in the roster, then (if
   feasible in the test environment) transfer or delete it in-game so it
@@ -75,7 +61,7 @@ Each scenario below maps to an acceptance scenario in `spec.md`.
 - **Expect**: that character's `isRemoved` becomes `true` in
   `GET /api/characters` rather than the row disappearing outright.
 
-### 5. Disconnect (FR-009)
+### 4. Disconnect (FR-009)
 
 - Call `DELETE /api/connection`.
 - **Expect**: `GET /api/connection` reports `connected: false`, and

@@ -30,7 +30,6 @@ describe('disconnect flow (real temp SQLite file)', () => {
         battlenetAccountId: 'acct-1',
         region: 'us',
         accessToken: 'enc-access',
-        refreshToken: 'enc-refresh',
         tokenExpiresAt: new Date(),
         connectedAt: new Date(),
         lastSyncStatus: 'success',

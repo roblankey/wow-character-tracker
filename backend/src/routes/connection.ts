@@ -50,7 +50,7 @@ export async function connectionRoutes(app: FastifyInstance): Promise<void> {
       const { code, state, error } = request.query;
 
       if (error || !code || !consumeState(state)) {
-        reply.redirect('/?connectionError=1');
+        reply.redirect(`${config.frontendUrl}/?connectionError=1`);
         return;
       }
 
@@ -68,7 +68,6 @@ export async function connectionRoutes(app: FastifyInstance): Promise<void> {
             battlenetAccountId: userInfo.id,
             region: config.battlenet.region,
             accessToken: encryptSecret(tokens.accessToken, config.tokenEncryptionKey),
-            refreshToken: encryptSecret(tokens.refreshToken, config.tokenEncryptionKey),
             tokenExpiresAt: tokens.expiresAt,
             connectedAt: new Date(),
             lastSyncStatus: 'never_run',
@@ -79,10 +78,10 @@ export async function connectionRoutes(app: FastifyInstance): Promise<void> {
           await syncCharacters(db, config, connection.id);
         }
 
-        reply.redirect('/');
+        reply.redirect(config.frontendUrl);
       } catch (err) {
         app.log.error(err);
-        reply.redirect('/?connectionError=1');
+        reply.redirect(`${config.frontendUrl}/?connectionError=1`);
       }
     },
   );

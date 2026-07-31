@@ -17,6 +17,13 @@ export interface Config {
   dbPath: string;
   /** 32-byte key (as a Buffer) used to encrypt OAuth tokens at rest. */
   tokenEncryptionKey: Buffer;
+  /**
+   * Origin the browser should land on after the Battle.net OAuth callback.
+   * Blizzard redirects the browser directly to the backend, not through the
+   * frontend dev proxy, so this must be an absolute URL — a relative
+   * redirect would resolve against the backend's own origin instead.
+   */
+  frontendUrl: string;
 }
 
 let cached: Config | undefined;
@@ -33,6 +40,7 @@ export function getConfig(): Config {
     },
     dbPath: process.env.DB_PATH ?? './data/wow-character-tracker.sqlite',
     tokenEncryptionKey: Buffer.from(requireEnv('TOKEN_ENCRYPTION_KEY'), 'hex'),
+    frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:5173',
   };
   if (cached.tokenEncryptionKey.length !== 32) {
     throw new Error('TOKEN_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)');

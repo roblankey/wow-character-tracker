@@ -11,7 +11,6 @@ describe('DELETE /api/connection', () => {
         battlenetAccountId: 'acct-1',
         region: 'us',
         accessToken: 'enc-access',
-        refreshToken: 'enc-refresh',
         tokenExpiresAt: new Date(),
         connectedAt: new Date(),
         lastSyncStatus: 'success',

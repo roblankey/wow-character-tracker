@@ -6,7 +6,6 @@ export const battleNetConnection = sqliteTable('battlenet_connection', {
   battlenetAccountId: text('battlenet_account_id').notNull(),
   region: text('region').notNull(),
   accessToken: text('access_token').notNull(),
-  refreshToken: text('refresh_token').notNull(),
   tokenExpiresAt: integer('token_expires_at', { mode: 'timestamp_ms' }).notNull(),
   connectedAt: integer('connected_at', { mode: 'timestamp_ms' }).notNull(),
   lastSyncedAt: integer('last_synced_at', { mode: 'timestamp_ms' }),

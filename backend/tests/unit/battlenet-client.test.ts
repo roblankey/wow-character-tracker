@@ -104,4 +104,44 @@ describe('Blizzard API client rate-limit backoff', () => {
       professions: [{ name: 'Blacksmithing', skillLevel: 100 }],
     });
   });
+
+  it('still includes a character whose profile detail 404s, with fallback values, instead of failing the whole sync', async () => {
+    // Confirmed against the live Blizzard API: some characters listed in the
+    // account summary 404 on their per-character profile/professions
+    // endpoints (e.g. low-activity ones not yet indexed by Blizzard).
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/profile/user/wow')) {
+        return Promise.resolve(
+          jsonResponse({
+            wow_accounts: [
+              {
+                characters: [
+                  {
+                    id: 1,
+                    name: 'Cxncoe',
+                    level: 12,
+                    realm: { slug: 'mannoroth', name: 'Mannoroth' },
+                    playable_class: { name: 'Rogue' },
+                    playable_race: { name: 'Human' },
+                    faction: { type: 'ALLIANCE' },
+                  },
+                ],
+              },
+            ],
+          }),
+        );
+      }
+      return Promise.resolve(new Response('Not Found', { status: 404 }));
+    });
+
+    const [result] = await fetchFullCharacterRoster(config, 'access-token');
+
+    expect(result).toMatchObject({
+      name: 'Cxncoe',
+      level: 12,
+      itemLevel: 0,
+      activeSpec: 'Unknown',
+      professions: [],
+    });
+  });
 });

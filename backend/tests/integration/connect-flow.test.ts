@@ -8,7 +8,6 @@ vi.mock('../../src/battlenet/oauth.js', async (importOriginal) => {
   return {
     ...actual,
     exchangeCodeForTokens: vi.fn(),
-    refreshAccessToken: vi.fn(),
     fetchUserInfo: vi.fn(),
   };
 });
@@ -45,7 +44,6 @@ describe('connect flow (real temp SQLite file, stubbed Blizzard client)', () => 
 
     vi.mocked(exchangeCodeForTokens).mockResolvedValue({
       accessToken: 'access-1',
-      refreshToken: 'refresh-1',
       expiresAt: new Date(Date.now() + 3600_000),
     });
     vi.mocked(fetchUserInfo).mockResolvedValue({ id: 'acct-1', battletag: 'Tester#1234' });

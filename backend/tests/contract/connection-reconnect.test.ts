@@ -5,7 +5,6 @@ vi.mock('../../src/battlenet/oauth.js', async (importOriginal) => {
   return {
     ...actual,
     exchangeCodeForTokens: vi.fn(),
-    refreshAccessToken: vi.fn(),
     fetchUserInfo: vi.fn(),
   };
 });
@@ -34,7 +33,6 @@ describe('GET /api/connection/callback (reconnect)', () => {
 
     vi.mocked(exchangeCodeForTokens).mockResolvedValue({
       accessToken: 'access-1',
-      refreshToken: 'refresh-1',
       expiresAt: new Date(Date.now() + 3600_000),
     });
     vi.mocked(fetchUserInfo).mockResolvedValue({ id: 'acct-1', battletag: 'First#1111' });
@@ -64,7 +62,6 @@ describe('GET /api/connection/callback (reconnect)', () => {
 
     vi.mocked(exchangeCodeForTokens).mockResolvedValue({
       accessToken: 'access-2',
-      refreshToken: 'refresh-2',
       expiresAt: new Date(Date.now() + 3600_000),
     });
     vi.mocked(fetchUserInfo).mockResolvedValue({ id: 'acct-2', battletag: 'Second#2222' });

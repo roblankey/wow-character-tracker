@@ -2,8 +2,7 @@ import { and, eq, notInArray } from 'drizzle-orm';
 import type { DbClient } from '../db/client.js';
 import type { Config } from '../config.js';
 import { battleNetConnection, character } from '../db/schema.js';
-import { decryptSecret, encryptSecret } from '../db/crypto.js';
-import { refreshAccessToken } from '../battlenet/oauth.js';
+import { decryptSecret } from '../db/crypto.js';
 import { fetchFullCharacterRoster } from '../battlenet/client.js';
 
 export interface SyncResult {
@@ -12,8 +11,11 @@ export interface SyncResult {
 }
 
 /**
- * Returns a valid (non-expired) access token for the connection, refreshing
- * and persisting new tokens first if the current one has expired.
+ * Returns the connection's access token, decrypted. Battle.net's
+ * user-authorization flow does not issue refresh tokens, so an expired
+ * token can't be silently renewed — the user must reconnect (which replaces
+ * the connection per FR-010), and until then this surfaces as a sync
+ * failure rather than a crash.
  */
 async function getValidAccessToken(
   db: DbClient,
@@ -30,23 +32,11 @@ async function getValidAccessToken(
   }
 
   const isExpired = connection.tokenExpiresAt.getTime() <= Date.now() + 60_000;
-  if (!isExpired) {
-    return decryptSecret(connection.accessToken, config.tokenEncryptionKey);
+  if (isExpired) {
+    throw new Error('Battle.net access token has expired; reconnect your account to refresh it.');
   }
 
-  const refreshToken = decryptSecret(connection.refreshToken, config.tokenEncryptionKey);
-  const tokens = await refreshAccessToken(config, refreshToken);
-
-  await db
-    .update(battleNetConnection)
-    .set({
-      accessToken: encryptSecret(tokens.accessToken, config.tokenEncryptionKey),
-      refreshToken: encryptSecret(tokens.refreshToken, config.tokenEncryptionKey),
-      tokenExpiresAt: tokens.expiresAt,
-    })
-    .where(eq(battleNetConnection.id, connectionId));
-
-  return tokens.accessToken;
+  return decryptSecret(connection.accessToken, config.tokenEncryptionKey);
 }
 
 /**

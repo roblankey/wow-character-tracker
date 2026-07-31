@@ -42,7 +42,17 @@
       "Bash(netstat -ano)",
       "Bash(taskkill //F //PID 11144)",
       "Bash(taskkill //F //PID 14696)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(sed -i \"/refreshAccessToken: vi\\\\.fn\\(\\),/d\" tests/integration/connect-flow.test.ts tests/integration/refresh-flow.test.ts tests/contract/refresh.test.ts tests/contract/connection-reconnect.test.ts tests/contract/connection-callback.test.ts)",
+      "Bash(sed -i \"/^\\\\s*refreshToken: 'refresh-[0-9]',$/d\" tests/integration/connect-flow.test.ts tests/contract/connection-reconnect.test.ts tests/contract/connection-callback.test.ts)",
+      "Bash(sed -i \"/^\\\\s*refreshToken: encryptedRefresh,$/d\" tests/contract/refresh.test.ts tests/integration/refresh-flow.test.ts)",
+      "Bash(sed -i \"/^const encryptedRefresh = encryptSecret/d\" tests/integration/refresh-flow.test.ts)",
+      "Bash(sed -i \"/^\\\\s*refreshToken: 'enc-refresh',$/d\" tests/integration/connect-flow.test.ts tests/integration/disconnect-flow.test.ts tests/contract/characters.test.ts tests/contract/connection-delete.test.ts tests/contract/connection.test.ts)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} -> %{redirect_url}\\\\n\" http://localhost:3001/api/connection/authorize)",
+      "Bash(curl -s -X POST http://localhost:3001/api/characters/refresh)",
+      "Bash(rm -f src/pages/ComparePage.tsx src/components/ComparisonView.tsx src/api/compare.ts)",
+      "Bash(rm -f tests/integration/compare-page.test.tsx tests/unit/compare.test.ts)",
+      "Bash(grep -n \"^## Phase\\\\|^---$\" \"/c/Users/robla/Git/wow-character-tracker/specs/001-battlenet-character-comparison/tasks.md\")"
     ]
   }
 }

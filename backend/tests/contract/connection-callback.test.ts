@@ -5,7 +5,6 @@ vi.mock('../../src/battlenet/oauth.js', async (importOriginal) => {
   return {
     ...actual,
     exchangeCodeForTokens: vi.fn(),
-    refreshAccessToken: vi.fn(),
     fetchUserInfo: vi.fn(),
   };
 });
@@ -33,7 +32,6 @@ describe('GET /api/connection/callback', () => {
     const { app, db } = buildTestApp();
     vi.mocked(exchangeCodeForTokens).mockResolvedValue({
       accessToken: 'access-1',
-      refreshToken: 'refresh-1',
       expiresAt: new Date(Date.now() + 3600_000),
     });
     vi.mocked(fetchUserInfo).mockResolvedValue({ id: 'acct-1', battletag: 'Tester#1234' });
@@ -45,7 +43,7 @@ describe('GET /api/connection/callback', () => {
     });
 
     expect(response.statusCode).toBe(302);
-    expect(response.headers.location).toBe('/');
+    expect(response.headers.location).toBe('http://localhost:5173');
 
     const rows = await db.select().from(battleNetConnection);
     expect(rows).toHaveLength(1);
@@ -61,7 +59,7 @@ describe('GET /api/connection/callback', () => {
     });
 
     expect(response.statusCode).toBe(302);
-    expect(response.headers.location).toBe('/?connectionError=1');
+    expect(response.headers.location).toBe('http://localhost:5173/?connectionError=1');
     expect(exchangeCodeForTokens).not.toHaveBeenCalled();
     expect(await db.select().from(battleNetConnection)).toHaveLength(0);
   });
@@ -76,6 +74,6 @@ describe('GET /api/connection/callback', () => {
     });
 
     expect(response.statusCode).toBe(302);
-    expect(response.headers.location).toBe('/?connectionError=1');
+    expect(response.headers.location).toBe('http://localhost:5173/?connectionError=1');
   });
 });

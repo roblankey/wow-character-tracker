@@ -5,7 +5,6 @@ vi.mock('../../src/battlenet/oauth.js', async (importOriginal) => {
   return {
     ...actual,
     exchangeCodeForTokens: vi.fn(),
-    refreshAccessToken: vi.fn(),
     fetchUserInfo: vi.fn(),
   };
 });
@@ -21,7 +20,6 @@ import { buildTestApp, createTestConfig } from '../helpers/testApp.js';
 
 const testConfig = createTestConfig();
 const encryptedAccess = encryptSecret('access-token', testConfig.tokenEncryptionKey);
-const encryptedRefresh = encryptSecret('refresh-token', testConfig.tokenEncryptionKey);
 
 describe('POST /api/characters/refresh', () => {
   beforeEach(() => {
@@ -42,7 +40,6 @@ describe('POST /api/characters/refresh', () => {
       battlenetAccountId: 'acct-1',
       region: 'us',
       accessToken: encryptedAccess,
-      refreshToken: encryptedRefresh,
       tokenExpiresAt: new Date(Date.now() + 3600_000),
       connectedAt: new Date(),
       lastSyncStatus: 'never_run',
@@ -63,7 +60,6 @@ describe('POST /api/characters/refresh', () => {
       battlenetAccountId: 'acct-1',
       region: 'us',
       accessToken: encryptedAccess,
-      refreshToken: encryptedRefresh,
       tokenExpiresAt: new Date(Date.now() + 3600_000),
       connectedAt: new Date(),
       lastSyncStatus: 'success',

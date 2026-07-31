@@ -1,12 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import type { ReactElement } from 'react';
-
-function renderWithRouter(ui: ReactElement) {
-  return render(<MemoryRouter>{ui}</MemoryRouter>);
-}
 
 vi.mock('../../src/api/client.js', () => ({
   apiClient: {
@@ -30,7 +24,7 @@ describe('RosterPage', () => {
     vi.mocked(apiClient.getConnection).mockResolvedValue({ connected: false });
     vi.mocked(apiClient.getCharacters).mockResolvedValue({ characters: [] });
 
-    renderWithRouter(<RosterPage />);
+    render(<RosterPage />);
 
     expect(await screen.findByRole('link', { name: /connect/i })).toHaveAttribute(
       'href',
@@ -64,7 +58,7 @@ describe('RosterPage', () => {
       ],
     });
 
-    renderWithRouter(<RosterPage />);
+    render(<RosterPage />);
 
     expect(await screen.findByText('Thrallmar')).toBeInTheDocument();
     expect(screen.getByText('Warrior')).toBeInTheDocument();
@@ -75,7 +69,7 @@ describe('RosterPage', () => {
     vi.mocked(apiClient.getConnection).mockResolvedValue({ connected: true, region: 'us' });
     vi.mocked(apiClient.getCharacters).mockResolvedValue({ characters: [] });
 
-    renderWithRouter(<RosterPage />);
+    render(<RosterPage />);
 
     expect(await screen.findByText(/no characters/i)).toBeInTheDocument();
   });
@@ -87,7 +81,7 @@ describe('RosterPage', () => {
     vi.mocked(apiClient.getCharacters).mockResolvedValue({ characters: [] });
     vi.mocked(apiClient.disconnect).mockResolvedValue(undefined);
 
-    renderWithRouter(<RosterPage />);
+    render(<RosterPage />);
 
     const disconnectButton = await screen.findByRole('button', { name: /disconnect/i });
     await userEvent.click(disconnectButton);

@@ -2,7 +2,6 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
   buildAuthorizeUrl,
   exchangeCodeForTokens,
-  refreshAccessToken,
   fetchUserInfo,
   BattleNetOAuthError,
 } from '../../src/battlenet/oauth.js';
@@ -24,7 +23,7 @@ describe('buildAuthorizeUrl', () => {
   });
 });
 
-describe('exchangeCodeForTokens / refreshAccessToken / fetchUserInfo', () => {
+describe('exchangeCodeForTokens / fetchUserInfo', () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
@@ -36,12 +35,11 @@ describe('exchangeCodeForTokens / refreshAccessToken / fetchUserInfo', () => {
     vi.unstubAllGlobals();
   });
 
-  it('exchanges an authorization code for tokens', async () => {
+  it('exchanges an authorization code for an access token', async () => {
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
           access_token: 'access-1',
-          refresh_token: 'refresh-1',
           expires_in: 3600,
           token_type: 'bearer',
         }),
@@ -52,7 +50,6 @@ describe('exchangeCodeForTokens / refreshAccessToken / fetchUserInfo', () => {
     const result = await exchangeCodeForTokens(config, 'auth-code');
 
     expect(result.accessToken).toBe('access-1');
-    expect(result.refreshToken).toBe('refresh-1');
     expect(result.expiresAt.getTime()).toBeGreaterThan(Date.now());
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
@@ -62,43 +59,10 @@ describe('exchangeCodeForTokens / refreshAccessToken / fetchUserInfo', () => {
     expect((init.body as URLSearchParams).get('code')).toBe('auth-code');
   });
 
-  it('refreshes an access token using a refresh token', async () => {
-    fetchMock.mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          access_token: 'access-2',
-          refresh_token: 'refresh-2',
-          expires_in: 3600,
-          token_type: 'bearer',
-        }),
-        { status: 200 },
-      ),
-    );
-
-    const result = await refreshAccessToken(config, 'old-refresh-token');
-
-    expect(result.accessToken).toBe('access-2');
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect((init.body as URLSearchParams).get('grant_type')).toBe('refresh_token');
-    expect((init.body as URLSearchParams).get('refresh_token')).toBe('old-refresh-token');
-  });
-
   it('throws a BattleNetOAuthError when the token endpoint responds with an error status', async () => {
     fetchMock.mockResolvedValue(new Response('invalid_grant', { status: 400 }));
 
     await expect(exchangeCodeForTokens(config, 'bad-code')).rejects.toBeInstanceOf(
-      BattleNetOAuthError,
-    );
-  });
-
-  it('throws when the token response is missing a refresh_token', async () => {
-    fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ access_token: 'access-1', expires_in: 3600 }), {
-        status: 200,
-      }),
-    );
-
-    await expect(exchangeCodeForTokens(config, 'auth-code')).rejects.toBeInstanceOf(
       BattleNetOAuthError,
     );
   });

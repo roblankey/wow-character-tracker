@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   apiClient,
   type CharacterDto,
@@ -13,7 +12,6 @@ import { ErrorBanner } from '../components/ErrorBanner.js';
 export function RosterPage() {
   const [status, setStatus] = useState<ConnectionStatusDto | null>(null);
   const [characters, setCharacters] = useState<CharacterDto[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -73,18 +71,6 @@ export function RosterPage() {
     }
   };
 
-  const toggleSelect = (id: number) => {
-    setSelectedIds((current) => {
-      const next = new Set(current);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
   if (loading) {
     return (
       <section>
@@ -118,20 +104,7 @@ export function RosterPage() {
           <RefreshButton onRefresh={handleRefresh} refreshing={refreshing} />
           {refreshError ? <ErrorBanner message={refreshError} /> : null}
           {characters.length > 0 ? (
-            <>
-              <RosterTable
-                characters={characters}
-                selectedIds={selectedIds}
-                onToggleSelect={toggleSelect}
-              />
-              {selectedIds.size >= 2 ? (
-                <Link to={`/compare?ids=${[...selectedIds].join(',')}`}>
-                  Compare selected ({selectedIds.size})
-                </Link>
-              ) : (
-                <p>Select two or more characters to compare them.</p>
-              )}
-            </>
+            <RosterTable characters={characters} />
           ) : (
             <p>No characters found on this account.</p>
           )}

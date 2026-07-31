@@ -1,8 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import type { ReactElement } from 'react';
 
 vi.mock('../../src/api/client.js', () => ({
   apiClient: {
@@ -16,10 +14,6 @@ vi.mock('../../src/api/client.js', () => ({
 
 import { apiClient } from '../../src/api/client.js';
 import { RosterPage } from '../../src/pages/RosterPage.js';
-
-function renderWithRouter(ui: ReactElement) {
-  return render(<MemoryRouter>{ui}</MemoryRouter>);
-}
 
 const existingCharacter = {
   id: 1,
@@ -53,7 +47,7 @@ describe('RosterPage refresh', () => {
       lastSyncStatus: 'success',
     });
 
-    renderWithRouter(<RosterPage />);
+    render(<RosterPage />);
 
     const refreshButton = await screen.findByRole('button', { name: /refresh/i });
     await userEvent.click(refreshButton);
@@ -78,7 +72,7 @@ describe('RosterPage refresh', () => {
       lastSyncError: 'Blizzard API did not respond',
     });
 
-    renderWithRouter(<RosterPage />);
+    render(<RosterPage />);
 
     const refreshButton = await screen.findByRole('button', { name: /refresh/i });
     await userEvent.click(refreshButton);

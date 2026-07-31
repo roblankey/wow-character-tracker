@@ -82,7 +82,8 @@ Edge Cases in spec.md).
 }
 ```
 
-Covers: FR-002, FR-003, FR-007, User Story 1 and 2.
+Covers: FR-002, FR-003, FR-007, User Story 1 (also re-read after a User
+Story 2 refresh completes, to show the updated roster).
 
 ## `POST /api/characters/refresh`
 
@@ -108,14 +109,4 @@ since the app itself handled the failure gracefully):
 The previous `lastSyncedAt`/roster data is left untouched so the frontend
 can keep showing the last good data labeled with its retrieval time.
 
-Covers: FR-005, FR-008, User Story 3.
-
-## No dedicated "compare" endpoint
-
-Comparison is computed client-side in `frontend/` from the already-fetched
-`GET /api/characters` response (see data-model.md's "Derived,
-non-persisted concept: Comparison"). This avoids a redundant network
-round-trip for data the frontend already has, per the constitution's
-Performance principle.
-
-Covers: FR-004, User Story 2.
+Covers: FR-005, FR-008, User Story 2.
