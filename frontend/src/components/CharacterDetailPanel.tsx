@@ -28,34 +28,40 @@ export function CharacterDetailPanel({ character, onClose }: CharacterDetailPane
       ) : (
         <p>No image available</p>
       )}
-      <dl>
-        <dt>Class</dt>
-        <dd>{character.class}</dd>
-        <dt>Race</dt>
-        <dd>{character.race}</dd>
-        <dt>Faction</dt>
-        <dd>{character.faction}</dd>
-        <dt>Realm</dt>
-        <dd>{character.realmName}</dd>
-        <dt>Level</dt>
-        <dd>{character.level}</dd>
-        <dt>Item Level</dt>
-        <dd>{character.itemLevel}</dd>
-        <dt>Spec</dt>
-        <dd>{character.activeSpec}</dd>
-      </dl>
-      <h3>Professions</h3>
-      {character.professions.length > 0 ? (
-        <ul>
-          {character.professions.map((profession) => (
-            <li key={profession.name}>
-              {profession.name} ({profession.skillLevel})
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No professions tracked.</p>
-      )}
+      <table className="character-detail-table">
+        <tbody>
+          <tr>
+            <th scope="row">Class</th>
+            <td>{character.class}</td>
+            <th scope="row">Race</th>
+            <td>{character.race}</td>
+          </tr>
+          <tr>
+            <th scope="row">Faction</th>
+            <td>{character.faction}</td>
+            <th scope="row">Realm</th>
+            <td>{character.realmName}</td>
+          </tr>
+          <tr>
+            <th scope="row">Level</th>
+            <td>{character.level}</td>
+            <th scope="row">Item Level</th>
+            <td>{character.itemLevel}</td>
+          </tr>
+          <tr>
+            <th scope="row">Spec</th>
+            <td colSpan={3}>{character.activeSpec}</td>
+          </tr>
+          <tr>
+            <th scope="row">Professions</th>
+            <td colSpan={3}>
+              {character.professions.length > 0
+                ? character.professions.map((profession) => profession.name).join(', ')
+                : 'No professions tracked.'}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </aside>
   );
 }

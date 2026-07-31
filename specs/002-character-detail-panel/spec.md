@@ -80,7 +80,8 @@ and switched between characters.
   width while open.
 - **FR-004**: The detail panel MUST display all tracked information for
   the selected character: name, class, race, faction, realm, level, item
-  level, active specialization, and professions.
+  level, active specialization, and professions (listed by name; per-
+  profession skill level is not surfaced in this panel).
 - **FR-005**: The detail panel MUST display an image representing the
   character.
 - **FR-006**: System MUST let the user close the detail panel and return
@@ -137,3 +138,6 @@ and switched between characters.
 - This feature only adds a way to view existing tracked character data
   (plus an image) in more detail — it does not add any new trackable
   character attributes beyond what the roster already stores.
+- Character details are laid out as a compact table beneath the image
+  rather than a long vertically-stacked list, so the panel does not
+  require excessive scrolling to see all fields at once.
