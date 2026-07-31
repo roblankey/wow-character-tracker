@@ -89,6 +89,16 @@ describe('Blizzard API client rate-limit backoff', () => {
           }),
         );
       }
+      if (url.includes('/character-media')) {
+        return Promise.resolve(
+          jsonResponse({
+            assets: [
+              { key: 'avatar', value: 'https://render.example.com/thrallmar-avatar.jpg' },
+              { key: 'main-raw', value: 'https://render.example.com/thrallmar-main-raw.jpg' },
+            ],
+          }),
+        );
+      }
       return Promise.resolve(
         jsonResponse({ equipped_item_level: 489, active_spec: { name: 'Protection' } }),
       );
@@ -102,7 +112,83 @@ describe('Blizzard API client rate-limit backoff', () => {
       itemLevel: 489,
       activeSpec: 'Protection',
       professions: [{ name: 'Blacksmithing', skillLevel: 100 }],
+      imageUrl: 'https://render.example.com/thrallmar-main-raw.jpg',
     });
+  });
+
+  it('falls back to the avatar asset when main-raw is not present', async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/profile/user/wow')) {
+        return Promise.resolve(
+          jsonResponse({
+            wow_accounts: [
+              {
+                characters: [
+                  {
+                    id: 1,
+                    name: 'Thrallmar',
+                    level: 80,
+                    realm: { slug: 'area-52', name: 'Area 52' },
+                    playable_class: { name: 'Warrior' },
+                    playable_race: { name: 'Orc' },
+                    faction: { type: 'HORDE' },
+                  },
+                ],
+              },
+            ],
+          }),
+        );
+      }
+      if (url.includes('/character-media')) {
+        return Promise.resolve(
+          jsonResponse({
+            assets: [{ key: 'avatar', value: 'https://render.example.com/thrallmar-avatar.jpg' }],
+          }),
+        );
+      }
+      if (url.includes('/professions')) {
+        return Promise.resolve(jsonResponse({}));
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+
+    const [result] = await fetchFullCharacterRoster(config, 'access-token');
+
+    expect(result?.imageUrl).toBe('https://render.example.com/thrallmar-avatar.jpg');
+  });
+
+  it('resolves imageUrl to null when character-media has no matching assets', async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/profile/user/wow')) {
+        return Promise.resolve(
+          jsonResponse({
+            wow_accounts: [
+              {
+                characters: [
+                  {
+                    id: 1,
+                    name: 'Thrallmar',
+                    level: 80,
+                    realm: { slug: 'area-52', name: 'Area 52' },
+                    playable_class: { name: 'Warrior' },
+                    playable_race: { name: 'Orc' },
+                    faction: { type: 'HORDE' },
+                  },
+                ],
+              },
+            ],
+          }),
+        );
+      }
+      if (url.includes('/character-media')) {
+        return Promise.resolve(jsonResponse({ assets: [{ key: 'inset', value: 'irrelevant' }] }));
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+
+    const [result] = await fetchFullCharacterRoster(config, 'access-token');
+
+    expect(result?.imageUrl).toBeNull();
   });
 
   it('still includes a character whose profile detail 404s, with fallback values, instead of failing the whole sync', async () => {
@@ -142,6 +228,7 @@ describe('Blizzard API client rate-limit backoff', () => {
       itemLevel: 0,
       activeSpec: 'Unknown',
       professions: [],
+      imageUrl: null,
     });
   });
 });

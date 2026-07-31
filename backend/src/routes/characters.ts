@@ -20,6 +20,7 @@ export async function charactersRoutes(app: FastifyInstance): Promise<void> {
         itemLevel: row.itemLevel,
         activeSpec: row.activeSpec,
         professions: JSON.parse(row.professions) as { name: string; skillLevel: number }[],
+        imageUrl: row.imageUrl,
         isRemoved: row.isRemoved,
         updatedAt: row.updatedAt.toISOString(),
       })),

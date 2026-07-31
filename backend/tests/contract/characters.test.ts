@@ -38,6 +38,7 @@ describe('GET /api/characters', () => {
       itemLevel: 489,
       activeSpec: 'Protection',
       professions: JSON.stringify([{ name: 'Blacksmithing', skillLevel: 100 }]),
+      imageUrl: 'https://render.example.com/thrallmar.jpg',
       updatedAt: new Date(),
     });
 
@@ -52,6 +53,42 @@ describe('GET /api/characters', () => {
       faction: 'Horde',
       class: 'Warrior',
       professions: [{ name: 'Blacksmithing', skillLevel: 100 }],
+      imageUrl: 'https://render.example.com/thrallmar.jpg',
     });
+  });
+
+  it('returns imageUrl as null when Blizzard has no media for the character', async () => {
+    const { app, db } = buildTestApp();
+    const [connection] = await db
+      .insert(battleNetConnection)
+      .values({
+        battlenetAccountId: 'acct-1',
+        region: 'us',
+        accessToken: 'enc-access',
+        tokenExpiresAt: new Date(),
+        connectedAt: new Date(),
+        lastSyncStatus: 'success',
+      })
+      .returning();
+    await db.insert(character).values({
+      connectionId: connection!.id,
+      battlenetCharacterId: 'char-1',
+      name: 'NoImage',
+      realmSlug: 'area-52',
+      realmName: 'Area 52',
+      faction: 'Horde',
+      class: 'Mage',
+      race: 'Undead',
+      level: 10,
+      itemLevel: 0,
+      activeSpec: 'Unknown',
+      professions: '[]',
+      updatedAt: new Date(),
+    });
+
+    const response = await app.inject({ method: 'GET', url: '/api/characters' });
+
+    const body = response.json() as { characters: { imageUrl: string | null }[] };
+    expect(body.characters[0]?.imageUrl).toBeNull();
   });
 });
