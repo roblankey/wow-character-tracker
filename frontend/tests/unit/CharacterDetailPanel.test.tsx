@@ -46,7 +46,9 @@ describe('CharacterDetailPanel', () => {
   });
 
   it('shows a placeholder immediately when imageUrl is null', () => {
-    render(<CharacterDetailPanel character={makeCharacter({ imageUrl: null })} onClose={vi.fn()} />);
+    render(
+      <CharacterDetailPanel character={makeCharacter({ imageUrl: null })} onClose={vi.fn()} />,
+    );
 
     expect(screen.queryByRole('img', { name: /thrallmar/i })).not.toBeInTheDocument();
     expect(screen.getByText(/no image available/i)).toBeInTheDocument();
@@ -63,7 +65,9 @@ describe('CharacterDetailPanel', () => {
   });
 
   it('shows removed status for a character flagged as removed', () => {
-    render(<CharacterDetailPanel character={makeCharacter({ isRemoved: true })} onClose={vi.fn()} />);
+    render(
+      <CharacterDetailPanel character={makeCharacter({ isRemoved: true })} onClose={vi.fn()} />,
+    );
 
     expect(screen.getByText(/removed/i)).toBeInTheDocument();
   });
